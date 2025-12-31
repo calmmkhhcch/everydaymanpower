@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>班表查詢工具</title>
+    <title>每日人力</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <style>
@@ -628,7 +628,7 @@
         <!-- 標題 -->
         <div class="text-center mb-4">
             <h1 class="fw-bold text-primary mb-2">
-                <i class="bi bi-calendar-check"></i> 班表查詢工具
+                <i class="bi bi-calendar-check"></i> 每日人力
             </h1>
             <p class="text-muted">上傳Excel班表，根據顏色和姓名分類顯示</p>
             <p class="text-muted small">支援 .xlsx 和 .xls 格式，自動檢測檔案結構</p>
@@ -1031,21 +1031,24 @@
         let allDates = [];
         let currentFileName = '';
         let deputyStatus = {}; // 儲存代領班勾選狀態
+        let currentYear = 2026; // 預設年份
+        let currentMonth = 1;   // 預設月份
         
         // LocalStorage 金鑰
         const STORAGE_KEYS = {
-            SCHEDULE_DATA: 'scheduleData_v10',
-            ALL_DATES: 'allDates_v10',
-            FILE_NAME: 'currentFileName_v10',
-            TIMESTAMP: 'lastUpdated_v10',
-            DEPUTY_STATUS: 'deputyStatus_v10'
+            SCHEDULE_DATA: 'scheduleData_v11',
+            ALL_DATES: 'allDates_v11',
+            FILE_NAME: 'currentFileName_v11',
+            TIMESTAMP: 'lastUpdated_v11',
+            DEPUTY_STATUS: 'deputyStatus_v11',
+            YEAR_MONTH: 'yearMonth_v11'
         };
         
         // DOM元素 - 將在DOM載入後初始化
         let uploadBtn, fileInput, reuploadBtn, clearStorageBtn;
         let copyNotification, deputyListSection, deputyListContainer;
         
-        console.log("初始化班表查詢工具...");
+        console.log("初始化每日人力工具...");
 
         // 複製通知函數
         function showCopyNotification() {
@@ -1182,6 +1185,8 @@
                 scheduleData = savedData.scheduleData;
                 allDates = savedData.allDates;
                 currentFileName = savedData.fileName || '';
+                currentYear = savedData.year || 2026;
+                currentMonth = savedData.month || 1;
                 
                 // 更新介面
                 updateDateSelect();
@@ -1310,6 +1315,32 @@
                     return;
                 }
                 
+                // 讀取年份和月份（從A1儲存格）
+                currentYear = 2026; // 預設值
+                currentMonth = 1;   // 預設值
+                
+                // 嘗試從第一行第一列讀取年份月份
+                if (jsonData[0] && jsonData[0][0]) {
+                    const yearMonthCell = String(jsonData[0][0]).trim();
+                    console.log("年份月份單元格內容:", yearMonthCell);
+                    
+                    // 使用正則表達式提取年份和月份
+                    const yearMatch = yearMonthCell.match(/(\d{4})\s*年/);
+                    const monthMatch = yearMonthCell.match(/(\d{1,2})\s*月/);
+                    
+                    if (yearMatch) {
+                        currentYear = parseInt(yearMatch[1]);
+                        console.log("解析到的年份:", currentYear);
+                    }
+                    
+                    if (monthMatch) {
+                        currentMonth = parseInt(monthMatch[1]);
+                        console.log("解析到的月份:", currentMonth);
+                    }
+                }
+                
+                console.log("使用的年份月份:", currentYear, "年", currentMonth, "月");
+                
                 // 尋找日期行
                 let dateRowIndex = -1;
                 for (let rowIndex = 0; rowIndex < Math.min(10, jsonData.length); rowIndex++) {
@@ -1353,7 +1384,9 @@
                             allDates.push({
                                 colIndex: colIndex,
                                 date: dateNum,
-                                dayOfWeek: dayOfWeek
+                                dayOfWeek: dayOfWeek,
+                                year: currentYear,
+                                month: currentMonth
                             });
                         }
                     }
@@ -1440,7 +1473,7 @@
                 }
                 
                 // 儲存到 LocalStorage
-                saveToLocalStorage(scheduleData, allDates, fileName);
+                saveToLocalStorage(scheduleData, allDates, fileName, currentYear, currentMonth);
                 
                 // 更新介面
                 updateDateSelect();
@@ -1564,7 +1597,7 @@
         }
 
         function getDayOfWeek(dayIndex) {
-            const days = ['一', '二', '三', '四', '五', '六', '日'];
+            const days = ['日', '一', '二', '三', '四', '五', '六'];
             return days[dayIndex];
         }
 
@@ -1604,7 +1637,7 @@
             allDates.forEach(dateInfo => {
                 const option = document.createElement('option');
                 option.value = dateInfo.date;
-                option.textContent = `12月${dateInfo.date}日 (星期${dateInfo.dayOfWeek})`;
+                option.textContent = `${dateInfo.year}年${dateInfo.month}月${dateInfo.date}日 (星期${dateInfo.dayOfWeek})`;
                 dateSelect.appendChild(option);
             });
             
@@ -1618,12 +1651,15 @@
             if (allDates.length > 0 && scheduleData.length > 0) {
                 const firstDate = allDates[0].date;
                 const lastDate = allDates[allDates.length - 1].date;
+                const year = allDates[0].year || currentYear;
+                const month = allDates[0].month || currentMonth;
+                
                 const dateStatsElement = document.getElementById('dateStats');
                 if (dateStatsElement) {
                     dateStatsElement.innerHTML = `
                         <div class="alert alert-light">
                             <i class="bi bi-calendar-range"></i>
-                            <strong>資料範圍：</strong>12月${firstDate}日 ~ 12月${lastDate}日
+                            <strong>資料範圍：</strong>${year}年${month}月${firstDate}日 ~ ${year}年${month}月${lastDate}日
                             <span class="ms-3"><strong>目標人員：</strong>${scheduleData.length}人</span>
                         </div>
                     `;
@@ -1746,6 +1782,7 @@
             const selectedDate = parseInt(dateSelect.value);
             if (!selectedDate) return;
             
+            // 獲取選擇的日期資訊
             const selectedOption = dateSelect.options[dateSelect.selectedIndex];
             const selectedDateInfo = document.getElementById('selectedDateInfo');
             if (selectedDateInfo) {
@@ -2779,11 +2816,12 @@
         }
 
         // 儲存資料到 LocalStorage
-        function saveToLocalStorage(scheduleData, allDates, fileName) {
+        function saveToLocalStorage(scheduleData, allDates, fileName, year, month) {
             try {
                 localStorage.setItem(STORAGE_KEYS.SCHEDULE_DATA, JSON.stringify(scheduleData));
                 localStorage.setItem(STORAGE_KEYS.ALL_DATES, JSON.stringify(allDates));
                 localStorage.setItem(STORAGE_KEYS.FILE_NAME, fileName);
+                localStorage.setItem(STORAGE_KEYS.YEAR_MONTH, JSON.stringify({ year: year, month: month }));
                 localStorage.setItem(STORAGE_KEYS.TIMESTAMP, new Date().getTime().toString());
                 
                 console.log("資料已儲存到 LocalStorage");
@@ -2800,6 +2838,7 @@
                 const scheduleDataStr = localStorage.getItem(STORAGE_KEYS.SCHEDULE_DATA);
                 const allDatesStr = localStorage.getItem(STORAGE_KEYS.ALL_DATES);
                 const fileName = localStorage.getItem(STORAGE_KEYS.FILE_NAME);
+                const yearMonthStr = localStorage.getItem(STORAGE_KEYS.YEAR_MONTH);
                 const timestamp = localStorage.getItem(STORAGE_KEYS.TIMESTAMP);
                 
                 if (!scheduleDataStr || !allDatesStr) {
@@ -2818,10 +2857,25 @@
                     return null;
                 }
                 
+                let year = 2026;
+                let month = 1;
+                
+                if (yearMonthStr) {
+                    try {
+                        const yearMonth = JSON.parse(yearMonthStr);
+                        year = yearMonth.year || 2026;
+                        month = yearMonth.month || 1;
+                    } catch (e) {
+                        console.error("解析年份月份失敗:", e);
+                    }
+                }
+                
                 return {
                     scheduleData: JSON.parse(scheduleDataStr),
                     allDates: JSON.parse(allDatesStr),
-                    fileName: fileName || ''
+                    fileName: fileName || '',
+                    year: year,
+                    month: month
                 };
             } catch (error) {
                 console.error("從 LocalStorage 載入資料失敗:", error);
@@ -2844,8 +2898,7 @@
             init();
         });
 
-        console.log("班表查詢工具初始化完成！");
+        console.log("每日人力工具初始化完成！");
     </script>
 </body>
-</html>
-
+    </html>
