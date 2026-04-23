@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>每日人力 - 智慧班表助手</title>
+    <title>每日人力 - 智慧班表助手（修正星期正確版）</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <style>
@@ -142,7 +142,7 @@
             margin: 8px 0;
             border-top: 1.5px solid rgba(220,53,69,0.5);
         }
-        /* 人員類別背景色 (還原原本鮮明色彩) */
+        /* 人員類別背景色 */
         .group-leader {
             background-color: rgba(255, 153, 0, 0.3) !important;
             border-left: 4px solid #ff9900 !important;
@@ -279,7 +279,7 @@
     <div class="container">
         <div class="text-center mb-3">
             <h1 class="fw-bold text-primary mb-1"><i class="bi bi-calendar-check"></i> 每日人力</h1>
-            <p class="text-muted small">上傳Excel班表 · 智能分類 · 點擊姓名即可複製</p>
+            <p class="text-muted small">上傳Excel班表 · 智能分類 · 實際星期自動對應 · 點擊姓名複製</p>
         </div>
 
         <div class="card">
@@ -302,7 +302,7 @@
         <div class="result-section" id="resultSection" style="display: none;">
             <div class="date-selector">
                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
-                    <h5 class="mb-0"><i class="bi bi-calendar-date"></i> 查詢日期</h5>
+                    <h5 class="mb-0"><i class="bi bi-calendar-date"></i> 查詢日期 (實際星期)</h5>
                     <div class="d-flex gap-2">
                         <button class="btn btn-outline-secondary btn-sm" id="reuploadBtn"><i class="bi bi-arrow-clockwise"></i> 重新上傳</button>
                         <button class="btn btn-outline-danger btn-sm" id="clearStorageBtn"><i class="bi bi-trash"></i> 清除資料</button>
@@ -323,10 +323,10 @@
                         <div class="row g-1 small">
                             <div class="col-6 col-md-3"><span class="shift-code">K0</span> 05:00~13:00</div><div class="col-6 col-md-3"><span class="shift-code">M3</span> 07:00~15:00</div>
                             <div class="col-6 col-md-3"><span class="shift-code">D2</span> 10:00~18:00</div><div class="col-6 col-md-3"><span class="shift-code">N1</span> 14:30~22:30</div>
-                            <div class="col-6 col-md-3"><span class="shift-code">K4</span> 19:00~03:00</div><div class="col-6 col-md-3"><span class="shift-code training-shift">T3</span> 訓練08:00~16:00</div>
+                            <div class="col-6 col-md-3"><span class="shift-code">K4</span> 19:00~03:00</div><div class="col-6 col-md-3 training-shift">T3 訓練08:00~16:00</div>
                             <div class="col-6 col-md-3"><span class="shift-code">M</span> 05:30~13:30</div><div class="col-6 col-md-3"><span class="shift-code">D</span> 08:00~16:00</div>
                             <div class="col-6 col-md-3"><span class="shift-code">D6</span> 12:00~20:00</div><div class="col-6 col-md-3"><span class="shift-code">N3</span> 15:00~23:00</div>
-                            <div class="col-6 col-md-3"><span class="shift-code">K5</span> 21:00~05:00</div><div class="col-6 col-md-3"><span class="shift-code training-shift">T2</span> 訓練22:30~06:30</div>
+                            <div class="col-6 col-md-3"><span class="shift-code">K5</span> 21:00~05:00</div><div class="col-6 col-md-3 training-shift">T2 訓練22:30~06:30</div>
                             <div class="col-6 col-md-3"><span class="shift-code">M1</span> 06:00~14:00</div><div class="col-6 col-md-3"><span class="shift-code">D4</span> 08:00~16:30</div>
                             <div class="col-6 col-md-3"><span class="shift-code">K1</span> 13:30~21:30</div><div class="col-6 col-md-3"><span class="shift-code">N</span> 16:00~24:00</div>
                             <div class="col-6 col-md-3"><span class="shift-code">K6</span> 22:00~06:00</div><div class="col-6 col-md-3 holiday-shift">Z 例休</div>
@@ -363,7 +363,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
-        // ======================== 完整資料與邏輯 ========================
+        // ======================== 完整資料與邏輯 (修正星期正確版) ========================
         const targetPersonnel = [
             '馮一民','嚴奕麟','范原福','劉勝得','黃茂松','喬宇民','方彥霖','蔡宗昌','陳登峯','陳枝萬','林義勳',
             '王樂美','黃志傑','黃弘仁','楊金雄','王昱博','郭鎮溢','康子平','張景驊','蔡文財','吳建宗','張帝如',
@@ -391,13 +391,12 @@
         const holidayDisplayOrder = ['group-leader','foreman','authorized-person','qc-person','m1-person','m0-person','warehouse-person','administrative-person'];
 
         let scheduleData = [], allDates = [], currentFileName = '', deputyStatus = {}, currentYear=2026, currentMonth=1;
-        const STORAGE_KEYS = {SCHEDULE_DATA:'scheduleData_v17',ALL_DATES:'allDates_v17',FILE_NAME:'fileName_v17',DEPUTY_STATUS:'deputyStatus_v17',YEAR_MONTH:'yearMonth_v17'};
+        const STORAGE_KEYS = {SCHEDULE_DATA:'scheduleData_v18',ALL_DATES:'allDates_v18',FILE_NAME:'fileName_v18',DEPUTY_STATUS:'deputyStatus_v18',YEAR_MONTH:'yearMonth_v18'};
 
         function getPersonCategory(name) { for(let c in personnelCategories) if(personnelCategories[c].names.includes(name)) return c; return 'random'; }
         function analyzeShift(shiftStr){
             if(!shiftStr || typeof shiftStr!='string') return {normalizedShift:'',isEnglishThreeCharSlash:false,isOtherSlash:false,isHoliday:false};
             let s=shiftStr.trim();
-            // 留停 與 S 歸類為特殊班型 (非斜線，但視為特殊)
             if(s === '留停' || s === 'S') {
                 return {normalizedShift:s, isEnglishThreeCharSlash:false, isOtherSlash:true, isHoliday:false};
             }
@@ -416,8 +415,33 @@
         }
         function sortByRank(persons){ return persons.sort((a,b)=>((personnelCategories[a.category]?.rank||9)-(personnelCategories[b.category]?.rank||9) || a.name.localeCompare(b.name))); }
         
+        // 根據真實年月日計算星期幾 (核心修正)
+        function getRealWeekday(year, month, day) {
+            const dateObj = new Date(year, month-1, day);
+            const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+            return weekdays[dateObj.getDay()];
+        }
+        
+        // 修正儲存的 allDates 裡星期資料 (避免舊資料星期錯誤)
+        function fixStoredDatesWeekday(dates, year, month) {
+            return dates.map(d => {
+                if(d.year === year && d.month === month) {
+                    const correctDow = getRealWeekday(year, month, d.date);
+                    return { ...d, dayOfWeek: correctDow };
+                }
+                // 若有不相符的年月，依實際年月重新計算（安全）
+                const usedYear = d.year || year;
+                const usedMonth = d.month || month;
+                const correctDow = getRealWeekday(usedYear, usedMonth, d.date);
+                return { ...d, dayOfWeek: correctDow, year: usedYear, month: usedMonth };
+            });
+        }
+        
         function saveToLocalStorage(data,dates,fn,year,month){ localStorage.setItem(STORAGE_KEYS.SCHEDULE_DATA,JSON.stringify(data)); localStorage.setItem(STORAGE_KEYS.ALL_DATES,JSON.stringify(dates)); localStorage.setItem(STORAGE_KEYS.FILE_NAME,fn); localStorage.setItem(STORAGE_KEYS.YEAR_MONTH,JSON.stringify({year,month})); localStorage.setItem(STORAGE_KEYS.DEPUTY_STATUS,JSON.stringify(deputyStatus)); }
-        function loadFromLocalStorage(){ let data=localStorage.getItem(STORAGE_KEYS.SCHEDULE_DATA), dates=localStorage.getItem(STORAGE_KEYS.ALL_DATES), fn=localStorage.getItem(STORAGE_KEYS.FILE_NAME), ym=localStorage.getItem(STORAGE_KEYS.YEAR_MONTH); if(!data||!dates) return null; try{ let sD=JSON.parse(data), aD=JSON.parse(dates), yearMonth=ym?JSON.parse(ym):{year:2026,month:1}; let dep=localStorage.getItem(STORAGE_KEYS.DEPUTY_STATUS); if(dep) deputyStatus=JSON.parse(dep); return {scheduleData:sD,allDates:aD,fileName:fn||'',year:yearMonth.year,month:yearMonth.month}; }catch(e){return null;} }
+        function loadFromLocalStorage(){ let data=localStorage.getItem(STORAGE_KEYS.SCHEDULE_DATA), dates=localStorage.getItem(STORAGE_KEYS.ALL_DATES), fn=localStorage.getItem(STORAGE_KEYS.FILE_NAME), ym=localStorage.getItem(STORAGE_KEYS.YEAR_MONTH); if(!data||!dates) return null; try{ let sD=JSON.parse(data), aD=JSON.parse(dates), yearMonth=ym?JSON.parse(ym):{year:2026,month:1}; let dep=localStorage.getItem(STORAGE_KEYS.DEPUTY_STATUS); if(dep) deputyStatus=JSON.parse(dep); else deputyStatus={};
+            // 修正快取日期星期 (利用真實年月)
+            const fixedDates = fixStoredDatesWeekday(aD, yearMonth.year, yearMonth.month);
+            return {scheduleData:sD,allDates:fixedDates,fileName:fn||'',year:yearMonth.year,month:yearMonth.month}; }catch(e){return null;} }
         function clearLocalStorage(){ Object.values(STORAGE_KEYS).forEach(k=>localStorage.removeItem(k)); deputyStatus={}; }
         function showLoading(){ document.getElementById('loadingSpinner').style.display='block'; document.getElementById('resultSection').style.display='none'; }
         function hideLoading(){ document.getElementById('loadingSpinner').style.display='none'; document.getElementById('resultSection').style.display='block'; }
@@ -433,7 +457,12 @@
             for(let i=0;i<Math.min(10,json.length);i++){ let row=json[i]; if(!row) continue; let cnt=0; for(let c=3;c<=33;c++) if(row[c]>=1 && row[c]<=31) cnt++; if(cnt>=5){dateRowIdx=i; break;} }
             if(dateRowIdx===-1) dateRowIdx=1;
             let dateRow=json[dateRowIdx], dates=[];
-            for(let col=3;col<=33;col++){ let val=dateRow[col]; if(val>=1 && val<=31){ let dayIdx=(val-1)%7; let dow=['日','一','二','三','四','五','六'][dayIdx]; dates.push({colIndex:col,date:val,dayOfWeek:dow,year,month}); } }
+            for(let col=3;col<=33;col++){ let val=dateRow[col]; if(val>=1 && val<=31){ 
+                let dayNum = parseInt(val);
+                // 使用實際年月日計算星期幾
+                let realDow = getRealWeekday(year, month, dayNum);
+                dates.push({colIndex:col, date:dayNum, dayOfWeek:realDow, year, month}); 
+            } }
             if(dates.length===0){ showError('找不到日期列'); return; }
             let nameCol=2, schedule=[];
             for(let r=dateRowIdx+1;r<json.length;r++){
@@ -448,16 +477,16 @@
             scheduleData=schedule; allDates=dates; currentFileName=fileName; currentYear=year; currentMonth=month;
             saveToLocalStorage(scheduleData,allDates,fileName,year,month);
             updateDateSelect(); updateDateStats(); updateDeputyListDisplay();
-            hideLoading(); document.getElementById('fileInfo').style.display='none'; document.getElementById('resultSection').style.display='block'; document.getElementById('filterInfo').style.display='block'; document.getElementById('filterStatus').innerHTML=`已過濾 ${schedule.length} 人 (${fileName})`;
+            hideLoading(); document.getElementById('fileInfo').style.display='none'; document.getElementById('resultSection').style.display='block'; document.getElementById('filterInfo').style.display='block'; document.getElementById('filterStatus').innerHTML=`已過濾 ${schedule.length} 人 (${fileName})  · 星期已正確定年${year}月${month}`;
             showSelectedDateSchedule();
         }
         function handleFile(file){ currentFileName=file.name; document.getElementById('fileInfo').style.display='block'; document.getElementById('fileName').innerHTML=`處理: ${file.name}`; document.getElementById('errorMessage').style.display='none'; showLoading(); let reader=new FileReader(); reader.onload=e=>{ try{ let wb=XLSX.read(e.target.result,{type:'binary'}); parseWorkbook(wb,file.name); }catch(err){ showError('解析失敗:'+err.message); } }; reader.onerror=()=>showError('讀取失敗'); reader.readAsBinaryString(file); }
         function updateDateSelect(){ let sel=document.getElementById('dateSelect'); sel.innerHTML=''; allDates.forEach(d=>{ let opt=document.createElement('option'); opt.value=d.date; opt.textContent=`${d.year}/${d.month}/${d.date} (${d.dayOfWeek})`; sel.appendChild(opt); }); if(allDates.length) sel.selectedIndex=0; }
-        function updateDateStats(){ let statsDiv=document.getElementById('dateStats'); if(allDates.length) statsDiv.innerHTML=`<div class="alert alert-light py-1 mb-0"><i class="bi bi-calendar-range"></i> ${allDates[0].year}年${allDates[0].month}月 ${allDates[0].date}~${allDates[allDates.length-1].date} ・ 人員${scheduleData.length}</div>`; }
+        function updateDateStats(){ let statsDiv=document.getElementById('dateStats'); if(allDates.length && allDates[0]) statsDiv.innerHTML=`<div class="alert alert-light py-1 mb-0"><i class="bi bi-calendar-range"></i> ${allDates[0].year}年${allDates[0].month}月 ${allDates[0].date}~${allDates[allDates.length-1].date} ・ 人員${scheduleData.length} (星期正確)</div>`; }
         function updateDeputyListDisplay(){ let container=document.getElementById('deputyListContainer'); if(!container) return; container.innerHTML=''; let hasAny=false; deputyPersonnel.forEach(name=>{ if(scheduleData.some(p=>p.name===name)){ hasAny=true; let isChecked=!!deputyStatus[name]; let col=document.createElement('div'); col.className='col-6 col-md-3 mb-1'; col.innerHTML=`<div class="d-flex align-items-center p-1 border rounded"><input type="checkbox" class="deputy-checkbox me-1" id="dep-${name}" data-name="${name}" ${isChecked?'checked':''}><label class="small mb-0 ${isChecked?'fw-bold text-danger':''}" for="dep-${name}">${name}</label></div>`; container.appendChild(col); } }); document.getElementById('deputyListSection').style.display=hasAny?'block':'none'; document.querySelectorAll('.deputy-checkbox').forEach(cb=>cb.addEventListener('change',function(){ let nm=this.dataset.name; deputyStatus[nm]=this.checked; saveToLocalStorage(scheduleData,allDates,currentFileName,currentYear,currentMonth); updateDeputyListDisplay(); applyDeputyStatusToCards(); showSelectedDateSchedule(); })); }
         function applyDeputyStatusToCards(){ document.querySelectorAll('.person-card').forEach(card=>{ let nameElem=card.querySelector('.person-name'); if(nameElem){ let name=nameElem.innerText.replace('代領班','').trim(); if(deputyStatus[name]){ card.classList.add('deputy-card'); if(!card.querySelector('.deputy-badge')) nameElem.insertAdjacentHTML('beforeend','<span class="deputy-badge ms-1">代領班</span>'); }else{ card.classList.remove('deputy-card'); let badge=card.querySelector('.deputy-badge'); if(badge) badge.remove(); } } }); }
         
-        // 核心顯示函數，特殊班型移至隨機班型之下、K0之上
+        // 核心顯示函數 (沿用既有正確分類邏輯)
         function showSelectedDateSchedule(){
             let date=parseInt(document.getElementById('dateSelect').value); if(!date) return;
             let shiftGroups={}, total=0; scheduleData.forEach(p=>{ let sd=p.shifts[date]; if(sd){ if(!shiftGroups[sd.shift]) shiftGroups[sd.shift]=[]; shiftGroups[sd.shift].push({name:p.name,shift:sd.shift,originalShift:sd.originalShift,isEnglishThreeCharSlash:sd.isEnglishThreeCharSlash,isOtherSlash:sd.isOtherSlash,isHoliday:sd.isHoliday,category:p.category}); total++; } });
@@ -488,7 +517,6 @@
                 let order=['K0','M','M1','M2','M3','D4','D','D2','D5','D6','K2','N','K5','K6']; 
                 order.forEach(sh=>{ if(regular[sh]){ let persons=regular[sh]; let sec=document.createElement('div'); sec.className='shift-section regular-shift-section'; sec.innerHTML=`<div class="shift-title work-shift-title"><span class="badge bg-success">${sh}</span> <small>${shiftDescriptions[sh]||''}</small><span class="float-end">${persons.length}</span></div><div class="row" id="reg-${sh}"></div>`; container.appendChild(sec); let row=sec.querySelector('.row'); let sorted=sortByRank(persons); let lastRank=null; sorted.forEach(p=>{ let cat=p.category||'random'; let cssCls=personnelCategories[cat]?.cssClass || 'random-person'; if(lastRank!==cat){ if(lastRank) row.appendChild(document.createElement('hr')).className='rank-divider'; let titleDiv=document.createElement('div'); titleDiv.className='rank-title'; titleDiv.innerText=personnelCategories[cat]?.title||'其他'; row.appendChild(titleDiv); lastRank=cat; } let col=document.createElement('div'); col.className='col-6 col-sm-4 col-md-3 mb-2'; let isDep=!!deputyStatus[p.name]; col.innerHTML=`<div class="person-card ${cssCls} ${isDep?'deputy-card':''}"><div class="person-name">${p.name}${isDep?'<span class="deputy-badge">代領班</span>':''}</div></div>`; row.appendChild(col); }); } }); 
             }
-            // 依照需求：隨機班型 -> 特殊班型 -> 正規班型(K0起)
             renderGroup('隨機班型','random-section',random,true);
             renderGroup('特殊班型','special-section',special,true);
             renderRegular();
@@ -497,8 +525,8 @@
             if(holiday.length){ let sec=document.createElement('div'); sec.className='shift-section holiday-section'; let collapseId='holiday-'+Date.now(); sec.innerHTML=`<div class="shift-title holiday-title">🌴 休假人員 <span class="float-end">${holiday.length}</span></div><div><button class="btn btn-light btn-sm w-100 holiday-toggle-btn" data-bs-toggle="collapse" data-bs-target="#${collapseId}"><i class="bi bi-chevron-down"></i> 展開/收合 (${holiday.length}人)</button><div class="collapse" id="${collapseId}"><div class="collapse-content p-2" id="holidayContent"></div></div></div>`; container.appendChild(sec); let holidayDiv=sec.querySelector('#holidayContent'); let grouped={}; holiday.forEach(p=>{ let cat=p.category||'other'; if(!grouped[cat]) grouped[cat]=[]; grouped[cat].push(p); }); holidayDisplayOrder.forEach(cat=>{ if(grouped[cat] && grouped[cat].length){ let titleDiv=document.createElement('div'); titleDiv.className=`holiday-category-title ${cat}-title`; titleDiv.innerText=`${personnelCategories[cat]?.title||cat} (${grouped[cat].length})`; holidayDiv.appendChild(titleDiv); let rowDiv=document.createElement('div'); rowDiv.className='row'; grouped[cat].forEach(p=>{ let col=document.createElement('div'); col.className='col-6 col-sm-4 col-md-3 mb-2'; let isDep=!!deputyStatus[p.name]; let cssCls=personnelCategories[cat]?.cssClass || 'random-person'; col.innerHTML=`<div class="person-card ${cssCls} ${isDep?'deputy-card':''}"><div class="person-name">${p.name}${isDep?'<span class="deputy-badge">代領班</span>':''}</div></div>`; rowDiv.appendChild(col); }); holidayDiv.appendChild(rowDiv); } }); }
             setTimeout(()=>{ document.querySelectorAll('.person-card').forEach(card=>{ if(!card.hasAttribute('data-listener')){ card.setAttribute('data-listener','true'); card.addEventListener('click',(e)=>{ let nameSpan=card.querySelector('.person-name'); if(nameSpan){ let name=nameSpan.innerText.replace('代領班','').trim(); navigator.clipboard.writeText(name); let notify=document.getElementById('copyNotification'); notify.classList.add('show'); setTimeout(()=>notify.classList.remove('show'),1500); } }); } }); applyDeputyStatusToCards(); },50);
         }
-        function init(){ document.getElementById('uploadBtn').addEventListener('click',()=>document.getElementById('fileInput').click()); document.getElementById('fileInput').addEventListener('change',e=>{ if(e.target.files[0]) handleFile(e.target.files[0]); }); document.getElementById('reuploadBtn').addEventListener('click',()=>document.getElementById('fileInput').click()); document.getElementById('clearStorageBtn').addEventListener('click',()=>{ if(confirm('清除所有資料？')){ clearLocalStorage(); location.reload(); } }); document.getElementById('dateSelect')?.addEventListener('change',()=>showSelectedDateSchedule()); let saved=loadFromLocalStorage(); if(saved){ scheduleData=saved.scheduleData; allDates=saved.allDates; currentFileName=saved.fileName; currentYear=saved.year; currentMonth=saved.month; updateDateSelect(); updateDateStats(); updateDeputyListDisplay(); document.getElementById('resultSection').style.display='block'; document.getElementById('filterInfo').style.display='block'; document.getElementById('filterStatus').innerHTML=`使用快取 (${currentFileName}) ${scheduleData.length}人`; showSelectedDateSchedule(); } }
+        function init(){ document.getElementById('uploadBtn').addEventListener('click',()=>document.getElementById('fileInput').click()); document.getElementById('fileInput').addEventListener('change',e=>{ if(e.target.files[0]) handleFile(e.target.files[0]); }); document.getElementById('reuploadBtn').addEventListener('click',()=>document.getElementById('fileInput').click()); document.getElementById('clearStorageBtn').addEventListener('click',()=>{ if(confirm('清除所有資料？')){ clearLocalStorage(); location.reload(); } }); document.getElementById('dateSelect')?.addEventListener('change',()=>showSelectedDateSchedule()); let saved=loadFromLocalStorage(); if(saved){ scheduleData=saved.scheduleData; allDates=saved.allDates; currentFileName=saved.fileName; currentYear=saved.year; currentMonth=saved.month; updateDateSelect(); updateDateStats(); updateDeputyListDisplay(); document.getElementById('resultSection').style.display='block'; document.getElementById('filterInfo').style.display='block'; document.getElementById('filterStatus').innerHTML=`使用快取 (${currentFileName}) ${scheduleData.length}人 · 星期已校正`; showSelectedDateSchedule(); } }
         document.addEventListener('DOMContentLoaded',init);
     </script>
 </body>
-                                                                                                                </html>
+</html>
