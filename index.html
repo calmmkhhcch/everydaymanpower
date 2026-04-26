@@ -3,530 +3,537 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>每日人力 - 智慧班表助手（修正星期正確版）</title>
+    <title>每日人力 - 智慧班表助手（授權明細列表式）</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <style>
-        /* ----- 全局緊湊風格，自適應所有裝置 ----- */
-        * {
-            box-sizing: border-box;
-        }
-        body {
-            background-color: #f4f7fc;
-            font-family: 'Segoe UI', 'Microsoft JhengHei', system-ui, -apple-system, 'Helvetica Neue', sans-serif;
-            padding: 12px 0 30px 0;
-            margin: 0;
-        }
-        .container {
-            max-width: 1400px;
-            padding-left: 12px;
-            padding-right: 12px;
-        }
-        .text-center.mb-4 {
-            margin-bottom: 1.2rem !important;
-        }
-        h1 {
-            font-size: 1.8rem;
-            margin-bottom: 0.25rem;
-        }
-        .text-muted {
-            font-size: 0.8rem;
-            margin-bottom: 0.2rem;
-        }
-        .card {
-            border-radius: 16px;
-            margin-bottom: 1rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            overflow: hidden;
-        }
-        .card-body {
-            padding: 1rem 1rem;
-        }
-        .card-title {
-            font-size: 1.2rem;
-            margin-bottom: 0.5rem;
-        }
-        .upload-area {
-            padding: 20px 15px;
-            cursor: pointer;
-        }
-        .upload-instruction {
-            font-size: 1rem;
-            margin-bottom: 0.5rem;
-        }
-        .btn-lg {
-            padding: 0.5rem 1.2rem;
-            font-size: 1rem;
-        }
-        .date-selector {
-            padding: 12px 15px;
-            margin-bottom: 16px;
-            background: white;
-            border-radius: 20px;
-        }
-        .date-selector h5 {
-            font-size: 1rem;
-            margin-bottom: 0.3rem;
-        }
-        .form-select-lg {
-            font-size: 0.95rem;
-            padding: 0.5rem 0.75rem;
-        }
-        .btn-outline-secondary, .btn-outline-danger {
-            padding: 0.3rem 0.8rem;
-            font-size: 0.85rem;
-        }
-        .shift-section {
-            padding: 12px 15px;
-            margin-bottom: 16px;
-            border-radius: 20px;
-        }
-        .shift-title {
-            font-size: 1.05rem;
-            font-weight: 700;
-            margin-bottom: 12px;
-            padding-bottom: 8px;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: baseline;
-            justify-content: space-between;
-        }
-        .shift-title .badge {
-            font-size: 0.85rem;
-            padding: 5px 12px;
-        }
-        /* 人員卡片 - 高密度，鮮明顏色 */
-        .person-card {
-            padding: 10px 10px 8px 10px;
-            margin-bottom: 8px;
-            border-radius: 14px;
-            background-color: rgba(255,255,255,0.85);
-            transition: all 0.2s ease;
-            height: 100%;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            border-left: 4px solid #e0e0e0;
-            cursor: pointer;
-        }
-        .person-name {
-            font-size: 1rem;
-            font-weight: 600;
-            display: inline-block;
-            padding: 2px 4px;
-            border-radius: 10px;
-            margin-bottom: 2px;
-            word-break: keep-all;
-        }
-        .deputy-badge {
-            font-size: 0.65rem;
-            padding: 2px 6px;
-            margin-left: 6px;
-            vertical-align: middle;
-            background-color: #dc3545;
-            color: white;
-            border-radius: 12px;
-        }
-        .shift-description {
-            font-size: 0.7rem;
-            color: #5a626e;
-            margin-top: 5px;
-            line-height: 1.2;
-        }
-        .rank-title {
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin: 8px 0 5px 0;
-            padding-bottom: 3px;
-            border-bottom: 1px solid rgba(0,0,0,0.1);
-        }
-        .rank-divider {
-            margin: 8px 0;
-            border-top: 1.5px solid rgba(220,53,69,0.5);
-        }
-        /* 人員類別背景色 */
-        .group-leader {
-            background-color: rgba(255, 153, 0, 0.3) !important;
-            border-left: 4px solid #ff9900 !important;
-        }
-        .foreman {
-            background-color: rgba(255, 204, 153, 0.4) !important;
-            border-left: 4px solid #ffcc99 !important;
-        }
-        .authorized-person {
-            background-color: rgba(255, 255, 255, 0.9) !important;
-            border-left: 4px solid #b0b0b0 !important;
-        }
-        .m1-person {
-            background-color: rgba(204, 255, 204, 0.5) !important;
-            border-left: 4px solid #9bcd9b !important;
-        }
-        .m0-person {
-            background-color: rgba(198, 224, 180, 0.5) !important;
-            border-left: 4px solid #a8c99a !important;
-        }
-        .qc-person {
-            background-color: rgba(238, 201, 32, 0.4) !important;
-            border-left: 4px solid #eec920 !important;
-        }
-        .warehouse-person {
-            background-color: rgba(186, 225, 143, 0.45) !important;
-            border-left: 4px solid #bae18f !important;
-        }
-        .administrative-person {
-            background-color: rgba(255, 107, 107, 0.35) !important;
-            border-left: 4px solid #ff6b6b !important;
-        }
-        .random-person {
-            background-color: rgba(255, 255, 0, 0.25) !important;
-            border-left: 4px solid #ffd966 !important;
-        }
-        /* 代領班特殊卡片 */
-        .deputy-card {
-            background-color: rgba(220, 53, 69, 0.25) !important;
-            border-left: 4px solid #dc3545 !important;
-        }
-        /* 班型區塊背景色 */
-        .holiday-section {
-            background-color: rgba(255, 158, 0, 0.15) !important;
-            border-left: 4px solid #ff9e00;
-        }
-        .regular-shift-section {
-            background-color: rgba(6, 214, 160, 0.12) !important;
-            border-left: 4px solid #06d6a0;
-        }
-        .random-section {
-            background-color: rgba(255, 255, 0, 0.12) !important;
-            border-left: 4px solid #e6c300;
-        }
-        .special-section {
-            background-color: rgba(156, 39, 176, 0.12) !important;
-            border-left: 4px solid #9c27b0;
-        }
-        .warehouse-section {
-            background-color: rgba(186, 225, 143, 0.2) !important;
-            border-left: 4px solid #bae18f;
-        }
-        .administrative-section {
-            background-color: rgba(255, 107, 107, 0.12) !important;
-            border-left: 4px solid #ff6b6b;
-        }
-        /* 班型標題顏色 */
+        * { box-sizing: border-box; }
+        body { background-color: #f4f7fc; font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif; padding: 12px 0 30px 0; }
+        .container { max-width: 1600px; padding: 0 12px; }
+        .two-column-layout { display: flex; flex-wrap: wrap; gap: 20px; }
+        .main-content { flex: 2.4; min-width: 0; }
+        .sort-sidebar { flex: 1.3; min-width: 300px; }
+        @media (max-width: 992px) { .two-column-layout { flex-direction: column; } }
+        .card { border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: none; margin-bottom: 1rem; }
+        .shift-section { padding: 12px 14px; margin-bottom: 16px; border-radius: 20px; }
+        .person-card { padding: 8px 10px; margin-bottom: 8px; border-radius: 14px; transition: all 0.2s; border-left: 4px solid #e0e0e0; cursor: pointer; position: relative; }
+        .person-name { font-weight: 600; font-size: 0.95rem; display: inline-block; }
+        .deputy-badge { font-size: 0.6rem; background-color: #dc3545; color: white; border-radius: 20px; padding: 2px 6px; margin-left: 6px; }
+        .shift-description { font-size: 0.7rem; color: #5a626e; margin-top: 4px; }
+        /* 原始顏色分類 */
+        .group-leader { background-color: rgba(255, 153, 0, 0.3) !important; border-left-color: #ff9900 !important; }
+        .foreman { background-color: rgba(255, 204, 153, 0.4) !important; border-left-color: #ffaa66 !important; }
+        .authorized-person { background-color: rgba(255, 255, 255, 0.9) !important; border-left-color: #3399ff !important; }
+        .m1-person { background-color: rgba(204, 255, 204, 0.5) !important; border-left-color: #6fbf6f !important; }
+        .m0-person { background-color: rgba(198, 224, 180, 0.5) !important; border-left-color: #8cb86e !important; }
+        .qc-person { background-color: rgba(238, 201, 32, 0.4) !important; border-left-color: #eec920 !important; }
+        .warehouse-person { background-color: rgba(186, 225, 143, 0.45) !important; border-left-color: #aad67a !important; }
+        .administrative-person { background-color: rgba(255, 107, 107, 0.25) !important; border-left-color: #ff6b6b !important; }
+        .random-person { background-color: rgba(255, 255, 180, 0.45) !important; border-left-color: #ffd966 !important; }
+        .deputy-card { background-color: rgba(220, 53, 69, 0.25) !important; border-left-color: #dc3545 !important; }
+        .rank-title { font-size: 0.8rem; font-weight: bold; margin: 8px 0 5px 0; padding-left: 4px; border-left: 3px solid #aaa; }
+        .holiday-section { background-color: rgba(255, 158, 0, 0.15) !important; border-left: 4px solid #ff9e00; }
         .holiday-title { color: #e67e22; }
         .work-shift-title { color: #1e7e5e; }
-        .random-title { color: #b8860b; }
-        .special-title { color: #7b1fa2; }
-        .warehouse-title { color: #5a8f2c; }
-        .administrative-title { color: #c93a3a; }
-        .warehouse-shift-title {
-            font-size: 0.85rem;
-            font-weight: bold;
-            color: #4a6e1f;
-            margin-top: 8px;
-            margin-bottom: 5px;
-            padding-bottom: 2px;
-            border-bottom: 1px dashed #bae18f;
-        }
-        .holiday-category-title {
-            font-size: 0.9rem;
-            padding: 4px 10px;
-            margin-top: 8px;
-            margin-bottom: 8px;
-            border-radius: 20px;
-            background-color: rgba(255,255,200,0.6);
-            font-weight: 600;
-        }
-        .group-leader-title { color: #ff9900; border-left: 3px solid #ff9900; padding-left: 8px; }
-        .foreman-title { color: #c97e00; border-left: 3px solid #ffcc99; padding-left: 8px; }
-        /* 響應式調整 */
-        .row {
-            margin-left: -6px;
-            margin-right: -6px;
-        }
-        .row > [class*="col-"] {
-            padding-left: 6px;
-            padding-right: 6px;
-        }
-        @media (max-width: 576px) {
-            body { padding: 8px 0 20px 0; }
-            .container { padding-left: 8px; padding-right: 8px; }
-            .person-card { padding: 8px 8px 6px 8px; }
-            .person-name { font-size: 0.9rem; }
-            .shift-title { font-size: 0.95rem; }
-            .shift-section { padding: 10px 12px; margin-bottom: 12px; }
-            .card-body { padding: 0.8rem; }
-            .date-selector { padding: 10px 12px; }
-            .btn-sm, .btn-outline-secondary, .btn-outline-danger { font-size: 0.75rem; }
-        }
-        @media (min-width: 768px) and (max-width: 1024px) {
-            .person-card { padding: 10px 8px; }
-        }
-        .alert { padding: 0.5rem 0.8rem; margin-bottom: 0.8rem; }
-        .file-info { padding: 8px; margin-top: 10px; }
-        .progress { height: 4px; margin-top: 8px; }
-        .shift-instruction-grid { padding: 8px 12px; }
-        .shift-instruction-item { font-size: 0.75rem; padding: 4px 5px; }
-        .shift-code { font-size: 0.75rem; }
-        .copy-notification { font-size: 0.85rem; padding: 8px 16px; position: fixed; top: 20px; right: 20px; background: #28a745; color: white; border-radius: 30px; opacity: 0; transition: 0.2s; z-index: 9999; }
-        .copy-notification.show { opacity: 1; transform: translateY(0); }
-        .deputy-list-section .card-body { padding: 12px; }
-        .deputy-list-title { font-size: 1rem; margin-bottom: 8px; }
-        /* 點擊複製游標提示 */
-        .person-card {
-            cursor: pointer;
-        }
+        .sort-panel { position: sticky; top: 20px; }
+        .sort-group-list { max-height: 50vh; overflow-y: auto; padding-right: 5px; }
+        .sort-item { background: white; border-radius: 14px; padding: 6px 10px; margin-bottom: 8px; border-left: 4px solid #17a2b8; font-size: 0.85rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .sort-item .badge-time { background: #e9ecef; padding: 2px 8px; border-radius: 30px; font-size: 0.7rem; }
+        .auth-detail-list { max-height: 40vh; overflow-y: auto; }
+        .auth-detail-item { background: #f8f9fa; border-radius: 16px; padding: 10px; margin-bottom: 10px; border-left: 4px solid #3399ff; }
+        .auth-name { font-weight: bold; font-size: 0.95rem; color: #0d6efd; margin-bottom: 6px; }
+        .auth-group { margin-top: 8px; }
+        .auth-group-header { font-weight: 600; color: #e67e22; margin-bottom: 4px; font-size: 0.85rem; }
+        .auth-items { list-style: none; padding-left: 0; margin-bottom: 0; }
+        .auth-items li { font-size: 0.8rem; margin-bottom: 4px; padding-left: 12px; position: relative; }
+        .auth-items li::before { content: "•"; position: absolute; left: 0; color: #3399ff; }
+        .orange-divider { border-top: 2px solid orange; margin: 12px 0; }
+        .modal-custom { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; }
+        .modal-custom-content { background: white; max-width: 550px; width: 90%; border-radius: 28px; padding: 20px; box-shadow: 0 20px 30px rgba(0,0,0,0.3); text-align: center; max-height: 80vh; overflow-y: auto; }
+        .modal-custom-content h5 { margin-bottom: 15px; color: #0d6efd; }
+        .close-modal { background: #dc3545; color: white; border: none; border-radius: 40px; padding: 8px 20px; margin-top: 15px; }
+        .copy-notification { position: fixed; bottom: 20px; right: 20px; background: #28a745; color: white; padding: 8px 16px; border-radius: 40px; font-size: 0.85rem; z-index: 1200; opacity: 0; transition: 0.2s; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="text-center mb-3">
-            <h1 class="fw-bold text-primary mb-1"><i class="bi bi-calendar-check"></i> 每日人力</h1>
-            <p class="text-muted small">上傳Excel班表 · 智能分類 · 實際星期自動對應 · 點擊姓名複製</p>
-        </div>
+<div class="container">
+    <div class="text-center mb-3">
+        <h1 class="fw-bold text-primary"><i class="bi bi-calendar-check"></i> 每日人力</h1>
+        <p class="text-muted small">上傳Excel班表 · 智慧分類 · 點擊授權人名看完整明細 · 右側授權清單</p>
+    </div>
 
-        <div class="card">
-            <div class="card-body text-center">
-                <i class="bi bi-file-earmark-excel" style="font-size: 3rem; color: #4361ee;"></i>
-                <h4 class="upload-instruction mt-2">點擊按鈕上傳班表檔案</h4>
-                <input type="file" id="fileInput" class="d-none" accept=".xlsx,.xls">
-                <button class="btn btn-primary px-4" id="uploadBtn" type="button"><i class="bi bi-folder2-open me-1"></i> 選擇檔案</button>
-                <p class="text-muted small mt-2 mb-0">支援 .xlsx / .xls，自動篩選指定人員</p>
-                <div id="fileInfo" class="file-info mt-2" style="display: none;"><i class="bi bi-check-circle text-success"></i> <span id="fileName"></span><div class="progress mt-1" id="progressBar" style="display: none;"><div class="progress-bar progress-bar-striped" style="width: 0%"></div></div></div>
-                <div id="errorMessage" class="alert alert-danger mt-2" style="display: none;"></div>
-            </div>
+    <div class="card">
+        <div class="card-body text-center">
+            <i class="bi bi-file-earmark-excel" style="font-size: 2.5rem; color: #2c7da0;"></i>
+            <h5 class="mt-2">點擊上傳班表 (.xlsx / .xls)</h5>
+            <input type="file" id="fileInput" class="d-none" accept=".xlsx,.xls">
+            <button class="btn btn-primary px-4 mt-1" id="uploadBtn"><i class="bi bi-folder2-open"></i> 選擇檔案</button>
+            <div id="fileInfo" class="mt-2 small" style="display:none;"><i class="bi bi-check-circle text-success"></i> <span id="fileName"></span></div>
+            <div id="errorMessage" class="alert alert-danger mt-2" style="display: none;"></div>
         </div>
+    </div>
 
-        <div class="loading-spinner" id="loadingSpinner" style="display: none; text-align: center; padding: 30px;">
-            <div class="spinner-border text-primary" style="width: 2.5rem; height: 2.5rem;"></div>
-            <h5 class="mt-2">解析班表中...</h5>
-        </div>
+    <div class="loading-spinner" id="loadingSpinner" style="display: none; text-align: center; padding: 20px;">
+        <div class="spinner-border text-primary"></div><span class="ms-2">解析班表中...</span>
+    </div>
 
-        <div class="result-section" id="resultSection" style="display: none;">
-            <div class="date-selector">
-                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
-                    <h5 class="mb-0"><i class="bi bi-calendar-date"></i> 查詢日期 (實際星期)</h5>
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-outline-secondary btn-sm" id="reuploadBtn"><i class="bi bi-arrow-clockwise"></i> 重新上傳</button>
-                        <button class="btn btn-outline-danger btn-sm" id="clearStorageBtn"><i class="bi bi-trash"></i> 清除資料</button>
+    <div class="result-section" id="resultSection" style="display: none;">
+        <div class="two-column-layout">
+            <!-- 左側主內容 -->
+            <div class="main-content">
+                <div class="date-selector mb-2 p-2 bg-white rounded-3 shadow-sm">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between">
+                        <h6 class="mb-0"><i class="bi bi-calendar-date"></i> 查詢日期</h6>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-secondary btn-sm" id="reuploadBtn"><i class="bi bi-arrow-clockwise"></i> 重新上傳</button>
+                            <button class="btn btn-outline-danger btn-sm" id="clearStorageBtn"><i class="bi bi-trash"></i> 清除資料</button>
+                        </div>
                     </div>
+                    <select class="form-select form-select-sm mt-2" id="dateSelect"></select>
+                    <div id="dateStats" class="small mt-1 text-secondary"></div>
                 </div>
-                <select class="form-select form-select-sm mt-2" id="dateSelect"></select>
-                <div id="dateStats" class="mt-2 small"></div>
-                <div id="filterInfo" class="filtered-list-info mt-2" style="display: none;"><i class="bi bi-funnel"></i> <span id="filterStatus"></span></div>
-            </div>
 
-            <!-- 班型對照表 可折疊 -->
-            <div class="card mb-3">
-                <div class="card-header p-2" data-bs-toggle="collapse" href="#shiftInstructionCollapse" role="button" aria-expanded="false" style="background: rgba(67,97,238,0.08); cursor: pointer;">
-                    <h6 class="mb-0 d-flex justify-content-between align-items-center"><span><i class="bi bi-info-circle me-1"></i> 班型時間對照表</span><i class="bi bi-chevron-down"></i></h6>
-                </div>
-                <div class="collapse" id="shiftInstructionCollapse">
-                    <div class="card-body p-2">
-                        <div class="row g-1 small">
-                            <div class="col-6 col-md-3"><span class="shift-code">K0</span> 05:00~13:00</div><div class="col-6 col-md-3"><span class="shift-code">M3</span> 07:00~15:00</div>
-                            <div class="col-6 col-md-3"><span class="shift-code">D2</span> 10:00~18:00</div><div class="col-6 col-md-3"><span class="shift-code">N1</span> 14:30~22:30</div>
-                            <div class="col-6 col-md-3"><span class="shift-code">K4</span> 19:00~03:00</div><div class="col-6 col-md-3 training-shift">T3 訓練08:00~16:00</div>
-                            <div class="col-6 col-md-3"><span class="shift-code">M</span> 05:30~13:30</div><div class="col-6 col-md-3"><span class="shift-code">D</span> 08:00~16:00</div>
-                            <div class="col-6 col-md-3"><span class="shift-code">D6</span> 12:00~20:00</div><div class="col-6 col-md-3"><span class="shift-code">N3</span> 15:00~23:00</div>
-                            <div class="col-6 col-md-3"><span class="shift-code">K5</span> 21:00~05:00</div><div class="col-6 col-md-3 training-shift">T2 訓練22:30~06:30</div>
-                            <div class="col-6 col-md-3"><span class="shift-code">M1</span> 06:00~14:00</div><div class="col-6 col-md-3"><span class="shift-code">D4</span> 08:00~16:30</div>
-                            <div class="col-6 col-md-3"><span class="shift-code">K1</span> 13:30~21:30</div><div class="col-6 col-md-3"><span class="shift-code">N</span> 16:00~24:00</div>
-                            <div class="col-6 col-md-3"><span class="shift-code">K6</span> 22:00~06:00</div><div class="col-6 col-md-3 holiday-shift">Z 例休</div>
-                            <div class="col-6 col-md-3 holiday-shift">GBL 國補</div><div class="col-6 col-md-3"><span class="shift-code">M2</span> 06:30~14:30</div>
-                            <div class="col-6 col-md-3"><span class="shift-code">D5</span> 09:00~17:00</div><div class="col-6 col-md-3"><span class="shift-code">K2</span> 14:00~22:00</div>
-                            <div class="col-6 col-md-3"><span class="shift-code">K3</span> 18:00~02:00</div><div class="col-6 col-md-3"><span class="shift-code">N2</span> 22:30~06:30</div>
-                            <div class="col-6 col-md-3 holiday-shift">R 休日</div><div class="col-6 col-md-3 holiday-shift">L 國內補</div><div class="col-6 col-md-3 holiday-shift">A 特休</div>
+                <div class="card mb-2">
+                    <div class="card-header p-2" data-bs-toggle="collapse" href="#shiftGuide" role="button" style="background:#f8f9fa; cursor:pointer;">
+                        <i class="bi bi-info-circle"></i> 班型對照表 <i class="bi bi-chevron-down float-end"></i>
+                    </div>
+                    <div class="collapse" id="shiftGuide">
+                        <div class="card-body p-2 small row g-1">
+                            <div class="col-6 col-md-3">K0 05~13</div><div class="col-6 col-md-3">M 05:30~13:30</div><div class="col-6 col-md-3">M1 06~14</div><div class="col-6 col-md-3">M2 06:30~14:30</div>
+                            <div class="col-6 col-md-3">M3 07~15</div><div class="col-6 col-md-3">D 08~16</div><div class="col-6 col-md-3">D2 10~18</div><div class="col-6 col-md-3">D4 08~16:30</div>
+                            <div class="col-6 col-md-3">D5 09~17</div><div class="col-6 col-md-3">D6 12~20</div><div class="col-6 col-md-3">K2 14~22</div><div class="col-6 col-md-3">N 16~24</div>
+                            <div class="col-6 col-md-3">K5 21~05</div><div class="col-6 col-md-3">K6 22~06</div><div class="col-6 col-md-3 holiday-shift">R/Z/公 例休</div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="card deputy-list-section mt-2" id="deputyListSection" style="display: none;">
-                <div class="card-body p-2">
-                    <h6 class="deputy-list-title mb-2"><i class="bi bi-person-badge"></i> 代領班標記</h6>
-                    <div class="row" id="deputyListContainer"></div>
+                <div class="card" id="dateResultCard">
+                    <div class="date-header p-2 bg-primary text-white rounded-top d-flex justify-content-between">
+                        <span><i class="bi bi-people"></i> 人力配置 (班型分組)</span>
+                        <span class="badge bg-light text-dark" id="resultCount">0人</span>
+                    </div>
+                    <div class="card-body p-2" id="scheduleResults"></div>
                 </div>
             </div>
 
-            <div class="card mt-2" id="dateResultCard">
-                <div class="date-header p-2 bg-primary text-white rounded-top d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="bi bi-people"></i> 人力配置</h5>
-                    <span class="badge bg-light text-dark" id="resultCount">0人</span>
+            <!-- 右側：排序 + 授權詳細清單 + 代領班 -->
+            <div class="sort-sidebar">
+                <div class="card sort-panel">
+                    <div class="card-header bg-white fw-bold"><i class="bi bi-clock-history"></i> 自動排序 · 非授權/非管理職</div>
+                    <div class="card-body p-2">
+                        <div class="d-grid gap-2 mb-3">
+                            <button class="btn btn-info btn-sm" id="autoSortBtn"><i class="bi bi-magic"></i> 執行排序 (依班型時間)</button>
+                            <small class="text-muted">※ 排除組長、領班、授權、行政、庫房及K5/K6/休假。<br>排序：D6前早班 → D6～N午晚班</small>
+                        </div>
+                        <div id="sortResultArea" class="mb-3"></div>
+                    </div>
                 </div>
-                <div class="card-body p-2">
-                    <div id="selectedDateInfo" class="alert alert-primary py-1 px-2 mb-2" style="display: none;"></div>
-                    <div id="scheduleResults"></div>
+
+                <div class="card mt-2" id="authDetailCard">
+                    <div class="card-header bg-white fw-bold text-primary"><i class="bi bi-person-badge"></i> ✈ 當日授權人員詳細資訊</div>
+                    <div class="card-body p-2 auth-detail-list" id="authDetailContainer">
+                        <div class="text-muted small text-center">請選擇日期</div>
+                    </div>
+                </div>
+
+                <div class="card mt-2" id="deputyListSection" style="display: none;">
+                    <div class="card-body p-2">
+                        <h6><i class="bi bi-person-badge"></i> 代領班標記</h6>
+                        <div class="row" id="deputyListContainer"></div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="copy-notification" id="copyNotification"><i class="bi bi-check-circle"></i> 已複製姓名</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script>
-        // ======================== 完整資料與邏輯 (修正星期正確版) ========================
-        const targetPersonnel = [
-            '馮一民','嚴奕麟','范原福','劉勝得','黃茂松','喬宇民','方彥霖','蔡宗昌','陳登峯','陳枝萬','林義勳',
-            '王樂美','黃志傑','黃弘仁','楊金雄','王昱博','郭鎮溢','康子平','張景驊','蔡文財','吳建宗','張帝如',
-            '高銘論','陳建旭','鄭旭軒','江啓民','馮宗賢','黃瑞昌','蘇權煌','黃策士','莊宇丞','劉家泰','江俊忠',
-            '鍾永源','陳郁青','蘇健文','洪啓晃','伍丁山','蔡嘉洋','曾景松','林柏辰','施登元','侯欽仁','游源正',
-            '陳冠勛','吳世莛','葉翊楷','黃浥綸','楊富雄','胡瓊文','林裕斌','江國棟','謝宏望','陳科全','蘇秉豪',
-            '蒲翊青','張馨元','施孟辰','林家德','李宗憲','楊育承','余謙和','江育鐘','龔義文','陳昭良','吳振義',
-            '李家旭','江宜德','王樂善','葉長青','蘇傳靖','何源運'
-        ];
-        const deputyPersonnel = ['陳登峯','陳枝萬','蔡宗昌','鍾永源','陳郁青','林義勳','劉家泰','江俊忠'];
-        const holidayShifts = ['公','R','GBL','L','A','福','Z'];
-        const regularShifts = ['K0','M','M1','M2','M3','K2','K5','K6','N','D6','D','D4','D5','D2'];
-        const shiftDescriptions = {'K0':'05:00~13:00','M':'05:30~13:30','M1':'06:00~14:00','M2':'06:30~14:30','M3':'07:00~15:00','D':'08:00~16:00','D2':'10:00~18:00','D4':'08:00~16:30','D5':'09:00~17:00','D6':'12:00~20:00','K2':'14:00~22:00','N':'16:00~24:00','K5':'21:00~05:00','K6':'22:00~06:00'};
-        const personnelCategories = {
-            'group-leader':{names:['馮一民','嚴奕麟','范原福'],cssClass:'group-leader',title:'組長',rank:1},
-            'foreman':{names:['劉勝得','黃茂松','喬宇民'],cssClass:'foreman',title:'領班',rank:2},
-            'authorized-person':{names:['方彥霖','蔡宗昌','陳登峯','陳枝萬','林義勳','王樂美','黃志傑','黃弘仁','楊金雄','王昱博','郭鎮溢','康子平','張景驊','劉家泰','江俊忠','鍾永源','陳郁青','蘇健文','洪啓晃','伍丁山','蔡嘉洋','曾景松','林柏辰','施登元','胡瓊文'],cssClass:'authorized-person',title:'授權人員',rank:3},
-            'm1-person':{names:['蔡文財','吳建宗','張帝如','高銘論','陳建旭','江啓民','馮宗賢','黃瑞昌','蘇權煌','侯欽仁','游源正','余謙和','江育鐘','龔義文','陳冠勛','林裕斌','江國棟','吳世莛','葉翊楷','黃浥綸','楊富雄','陳科全','蘇秉豪','蒲翊青'],cssClass:'m1-person',title:'M1人員',rank:4},
-            'm0-person':{names:['鄭旭軒','黃策士','謝宏望','莊宇丞','張馨元','施孟辰','林家德','李宗憲','楊育承'],cssClass:'m0-person',title:'M0人員',rank:5},
-            'qc-person':{names:['吳振義','李家旭'],cssClass:'qc-person',title:'QC人員',rank:6},
-            'administrative-person':{names:['陳昭良'],cssClass:'administrative-person',title:'行政人員',rank:7},
-            'warehouse-person':{names:['江宜德','王樂善','葉長青','蘇傳靖','何源運'],cssClass:'warehouse-person',title:'庫房人員',rank:8},
-            'random':{names:[],cssClass:'random-person',title:'其他',rank:9}
-        };
-        const holidayDisplayOrder = ['group-leader','foreman','authorized-person','qc-person','m1-person','m0-person','warehouse-person','administrative-person'];
+    <div id="authModal" class="modal-custom" onclick="closeModal(event)">
+        <div class="modal-custom-content">
+            <h5><i class="bi bi-airplane"></i> 完整授權資訊</h5>
+            <div id="modalAuthContent"></div>
+            <button class="close-modal" onclick="closeModal()">關閉</button>
+        </div>
+    </div>
+    <div id="copyNotification" class="copy-notification">已複製姓名</div>
+</div>
 
-        let scheduleData = [], allDates = [], currentFileName = '', deputyStatus = {}, currentYear=2026, currentMonth=1;
-        const STORAGE_KEYS = {SCHEDULE_DATA:'scheduleData_v18',ALL_DATES:'allDates_v18',FILE_NAME:'fileName_v18',DEPUTY_STATUS:'deputyStatus_v18',YEAR_MONTH:'yearMonth_v18'};
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+// ======================= 授權資料庫 (完整授權明細，與之前相同) =======================
+const authorizationDB = new Map();
+function addAuth(name, detail) { authorizationDB.set(name, detail); }
 
-        function getPersonCategory(name) { for(let c in personnelCategories) if(personnelCategories[c].names.includes(name)) return c; return 'random'; }
-        function analyzeShift(shiftStr){
-            if(!shiftStr || typeof shiftStr!='string') return {normalizedShift:'',isEnglishThreeCharSlash:false,isOtherSlash:false,isHoliday:false};
-            let s=shiftStr.trim();
-            if(s === '留停' || s === 'S') {
-                return {normalizedShift:s, isEnglishThreeCharSlash:false, isOtherSlash:true, isHoliday:false};
-            }
-            if(s.includes('體')) return {normalizedShift:'體',isEnglishThreeCharSlash:false,isOtherSlash:true,isHoliday:false};
-            if(s.includes('福')) return {normalizedShift:'福',isEnglishThreeCharSlash:false,isOtherSlash:false,isHoliday:true};
-            if(s.includes('公') && s!=='公') return {normalizedShift:'公',isEnglishThreeCharSlash:false,isOtherSlash:false,isHoliday:true};
-            let normalized=s, isEngThree=false, isOther=false, isHoliday=holidayShifts.includes(s);
-            if(s.includes('/')||s.includes('／')){
-                let parts=s.split(/[/／]/); let first=parts[0].trim();
-                isEngThree=/^[A-Za-z]{3}$/.test(first);
-                if(isEngThree) isEngThree=true; else isOther=true;
-                normalized=first;
-            }
-            if(normalized.endsWith('.')) normalized=normalized.slice(0,-1);
-            return {normalizedShift:normalized,isEnglishThreeCharSlash:isEngThree,isOtherSlash:isOther,isHoliday:isHoliday};
-        }
-        function sortByRank(persons){ return persons.sort((a,b)=>((personnelCategories[a.category]?.rank||9)-(personnelCategories[b.category]?.rank||9) || a.name.localeCompare(b.name))); }
-        
-        // 根據真實年月日計算星期幾 (核心修正)
-        function getRealWeekday(year, month, day) {
-            const dateObj = new Date(year, month-1, day);
-            const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
-            return weekdays[dateObj.getDay()];
-        }
-        
-        // 修正儲存的 allDates 裡星期資料 (避免舊資料星期錯誤)
-        function fixStoredDatesWeekday(dates, year, month) {
-            return dates.map(d => {
-                if(d.year === year && d.month === month) {
-                    const correctDow = getRealWeekday(year, month, d.date);
-                    return { ...d, dayOfWeek: correctDow };
+// 馮一民
+addAuth('馮一民', `✈ 授權明細：
+• CAA(華航): A330-300/GE CF6 (B1) · A330-300 GE CF6 Eng.Run-Up · A350-900 RR TRENT XWB (B1) + Run-Up · B737-800 CFM56 (B1) + Run-Up · B747-400 GE CF6 (B1) + Run-Up · B747-400 PW4000
+• EASA(華航): A330-200/300 CF6 · A330-300 Run-Up · B737-800 + Run-Up · B747-400 GE CF6 + Run-Up · B747-400 PW4000
+• FAA(華航): B737-800 + Run-Up · B747-400 GE CF6 + Run-Up · B747-400 PW4000
+• FAA(美聯): B737-800 CFM56`);
+
+addAuth('程家榮', `✈ 授權明細：
+• CAA(華航): A330-300 GE CF6 · A330-300 RR TRENT 700 · A350-900 RR TRENT XWB · B737-800 CFM56 · B747-400 GE CF6 · B747-400 PW4000
+• FAA(華航): B737-800 · B747-400 GE CF6 · B747-400 PW4000`);
+
+addAuth('范原福', `✈ 授權明細：
+• CAA(華航): A319/320/321 PW1100G (B1/B2) · A330-300 GE CF6 (B1/B2) + Run-Up · A350-900 RR TRENT XWB (B1/B2) + Run-Up · B737-800 CFM56 (B1/B2) + Run-Up · B747-400 GE CF6/PW4000 (B1/B2)
+• CAA(台虎): A320 PW1100G (B1/B2)
+• CAAC(南方): B737-700/800 CFM56 · 東航: B737-700/800 CFM56 · 廈航: B737-700/800
+• FAA(華航): B737-800 + Run-Up · B747-400 GE CF6/PW4000 (B1/B2)
+• FAA(美聯): B737-800
+• Korea MLTM(濟州): B737-800 CFM56-7B`);
+
+addAuth('黃茂松', `✈ 授權明細：
+• CAA(華航): A330-300 GE CF6 (B1/C) · B737-800 CFM56 (B1/C) · Borescope: CFM56-7B / GE CF6-80C2/E1 / IAE PW1100G/V2500 / PW1100G
+• CAAC(南方): B737-700/800 CFM56 · 東航: B737-700/800 · 廈航: B737-700/800
+• FAA(華航): B737-800 (B1/C) · Borescope · FAA(美聯): B737-800
+• Korea MLTM(濟州/德威): B737-800`);
+
+addAuth('喬宇民', `✈ 授權明細：
+• CAA(華航): A319/320/321 V2500 (B1/C) · A330-300 GE CF6 (B1/C) · B737-800 CFM56 (B1/C) + Run-Up · A318/319/320/321 CFM56 (C)
+• CAA(台虎): A320 V2500 (B1) + Run-Up
+• CAAC(南方): A319/320/321 CFM56/V2500 · B737-700/800 · 東航: A319/320/321 · B737-700/800 · 廈航: B737-700/800
+• CAAV(越南): A321 V2500
+• FAA(華航): A320/321 CFM56/V2500 (B1/C) · B737-800 + Run-Up (B1/C)
+• Korea MLTM(濟州/德威): B737-800`);
+
+addAuth('陳登峯', `✈ 授權明細：
+• CAA(華航): A318-321 CFM56 (B1/B2) · A319-321 PW1100G (B1/B2) + Run-Up · A319-321 V2500 (B1/B2) + Run-Up · A330-300 GE CF6 (B1/B2) + Run-Up · A350-900 RR TRENT XWB (B1/B2) + Run-Up · B737-800 CFM56 (B1/B2) + Run-Up · B747-400 GE CF6 (B1/B2) + Run-Up · B747-400 PW4000 · B777-200/300 GE90 + Run-Up · B777-300ER GE90 + Run-Up
+• CAAC(廈航): B737-700/800 CFM56
+• CAAV(越南): A321 V2500
+• FAA(華航): A320/321 CFM56/V2500 · B737-800 + Run-Up · B747-400 GE CF6/PW4000 (B1/B2)`);
+
+addAuth('蔡宗昌', `✈ 授權明細：
+• CAA(華航): A330-300 GE CF6 · B737-800 CFM56 + Run-Up
+• CAAC(南方): B737-700/800 · 東航: B737-700/800 · 廈航: B737-700/800
+• FAA(華航): B737-800 + Run-Up · FAA(美聯): B737-800
+• Korea MLTM(濟州/德威): B737-800`);
+
+addAuth('江俊忠', `✈ 授權明細：
+• CAA(華航): A319-321 PW1100G (B1/B2) · A319-321 V2500 (B1/B2) · A330-300 GE CF6 (B1/B2) + Run-Up · B737-800 CFM56 (B1/B2) + Run-Up
+• CAA(台虎): A320 V2500 (B1/B2) · A320 PW1100G (B1/B2)
+• CAAC(南方): A319-321 V2500/PW1100G · B737-700/800 (B1/B2) · 東航: B737-700/800 · 廈航: B737-700/800
+• CAAV(越南): A321 PW1100G/V2500 (B1/B2)
+• FAA(華航): B737-800 + Run-Up (B1/B2) · FAA(美聯): B737-800
+• Korea MLTM(濟州/德威): B737-800`);
+
+addAuth('鍾永源', `✈ 授權明細：
+• CAA(華航): A319-321 PW1100G + Run-Up · A319-321 V2500 · A330-300 GE CF6 + Run-Up · A330-300 RR TRENT 700 · B737-800 CFM56 + Run-Up · B747-400 GE CF6 + Run-Up · B747-400 PW4000
+• CAA(台虎): A320 V2500 + Run-Up · A320 PW1100G + Run-Up
+• CAAC(南方): A319-321 V2500/PW1100G · B737-700/800 · 東航: B737-700/800
+• FAA(華航): B737-800 + Run-Up · B747-400 GE CF6 + Run-Up · B747-400 PW4000
+• FAA(美聯): B737-800`);
+
+addAuth('林義勳', `✈ 授權明細：
+• CAA(華航): A319-321 PW1100G · A319-321 V2500 · A330-300 GE CF6 + Run-Up · A330-300 RR TRENT 700 · A350-900 RR TRENT XWB · B737-800 CFM56 + Run-Up · B747-400 GE CF6/PW4000 · B777-200/300 GE90 · B777-300ER GE90
+• CAA(台虎): A320 V2500 · A320 PW1100G
+• CAAC(東航): B737-700/800
+• FAA(華航): B737-800 + Run-Up · B747-400 GE CF6/PW4000
+• FAA(美聯): B737-800
+• Korea MLTM(濟州/德威): B737-800`);
+
+addAuth('陳枝萬', `✈ 授權明細：
+• CAA(華航): A319-321 PW1100G · A319-321 V2500 · A330-300 GE CF6 · B737-800 CFM56 · B747-400 GE CF6/PW4000 · B777-200/300 GE90 · B777-300ER GE90
+• CAA(台虎): A320 V2500 · A320 PW1100G
+• FAA(華航): B737-800 · B747-400 GE CF6/PW4000 · FAA(美聯): B737-800`);
+
+addAuth('陳郁青', `✈ 授權明細：
+• CAA(華航): A319-321 PW1100G + Run-Up · A319-321 V2500 + Run-Up · A330-300 GE CF6
+• CAA(台虎): A320 V2500 + Run-Up · A320 PW1100G + Run-Up
+• CAAC(南方): A319-321 V2500/PW1100G
+• CAAV(越南): A321 PW1100G/V2500
+• FAA(華航): No Limitation (M1)`);
+
+addAuth('林柏辰', `✈ 授權明細：
+• CAA(華航): A319-321 PW1100G + Run-Up · A319-321 V2500 + Run-Up · A330-300 GE CF6 · B777-200/300 GE90 · B777-300ER GE90 · No Limitation (M2)
+• CAA(台虎): A320 V2500 + Run-Up · A320 PW1100G + Run-Up
+• CAAC(南方): A319-321 V2500/PW1100G
+• CAAV(越南): A321 PW1100G/V2500
+• FAA(華航): No Limitation (M2)`);
+
+addAuth('王樂美', `✈ 授權明細：
+• CAA(華航): A330-300 GE CF6 · B737-800 CFM56
+• CAAC(南方): B737-700/800 · 東航: B737-700/800 · 廈航: B737-700/800
+• FAA(華航): B737-800 · FAA(美聯): B737-800
+• Korea MLTM(德威): B737-800`);
+
+addAuth('黃志傑', `✈ 授權明細：
+• CAA(華航): A330-300 GE CF6 · B737-800 CFM56
+• CAAC(南方): B737-700/800 · 東航: B737-700/800 · 廈航: B737-700/800
+• FAA(華航): B737-800 · FAA(美聯): B737-800
+• Korea MLTM(濟州/德威): B737-800`);
+
+addAuth('蘇健文', `✈ 授權明細：
+• CAA(華航): A318-321 CFM56 (B1/B2) · A319-321 PW1100G (B1/B2) · A319-321 V2500 (B1/B2) · A330-300 GE CF6 (B1/B2) · B737-800 CFM56 (B1/B2)
+• CAA(台虎): A320 V2500 (B1/B2) · A320 PW1100G (B1/B2)
+• CAAC(南方): A319-321 V2500/PW1100G · B737-700/800 (B1/B2) · 東航: A319-321 CFM56/V2500 · B737-700/800 · 廈航: B737-700/800
+• CAAV(越南): A321 PW1100G/V2500 (B1/B2)
+• FAA(華航): A320/321 CFM56/V2500 (B1/B2) · B737-800 (B1/B2)
+• FAA(美聯): B737-800
+• Korea MLTM(濟州/德威): B737-800`);
+
+addAuth('洪啟晃', `✈ 授權明細：
+• CAA(華航): B737-800 CFM56 + Run-Up
+• CAAC(南方): B737-700/800 · 東航: B737-700/800 · 廈航: B737-700/800
+• FAA(華航): B737-800 + Run-Up · FAA(美聯): B737-800`);
+
+addAuth('黃弘仁', `✈ 授權明細：
+• CAA(華航): A318-321 CFM56 · A319-321 PW1100G · A319-321 V2500 · A330-300 GE CF6 · B737-800 CFM56 · Borescope: CFM56-7B / IAE PW1100G/V2500
+• CAA(台虎): A320 V2500 · A320 PW1100G
+• CAAC(南方): A319-321 V2500/PW1100G · 東航: A319-321 CFM56/V2500 · B737-700/800 · 廈航: B737-700/800
+• CAAV(越南): A321 PW1100G/V2500
+• FAA(華航): A320/321 CFM56/V2500 · B737-800 · Borescope`);
+
+addAuth('楊金雄', `✈ 授權明細：
+• CAA(華航): A319-321 PW1100G + Run-Up · A319-321 V2500 · A330-300 GE CF6 · B737-800 CFM56
+• CAA(台虎): A320 V2500 + Run-Up · A320 PW1100G + Run-Up
+• CAAC(南方): A319-321 V2500/PW1100G · B737-700/800 · 東航: B737-700/800 · 廈航: B737-700/800
+• CAAV(越南): A321 PW1100G/V2500
+• FAA(華航): B737-800 · FAA(美聯): B737-800
+• Korea MLTM(濟州/德威): B737-800`);
+
+addAuth('王昱博', `✈ 授權明細：
+• CAA(華航): A319-321 PW1100G (B1/B2) · A319-321 V2500 (B1/B2) · A330-300 GE CF6 (B1/B2) + Run-Up · A330-300 RR TRENT 700 (B1/B2) · B737-800 CFM56 (B1/B2) + Run-Up · B747-400 GE CF6/PW4000 (B1/B2) + Run-Up
+• CAA(台虎): A320 V2500/PW1100G (B1/B2)
+• CAAC(南方): A319-321 V2500/PW1100G (B1/B2) · B737-700/800 · 廈航: B737-700/800
+• CAAV(越南): A321 PW1100G/V2500 (B1/B2)
+• FAA(華航): B737-800 + Run-Up · B747-400 GE CF6/PW4000 (B1/B2)
+• FAA(美聯): B737-800
+• Korea MLTM(德威): B737-800`);
+
+addAuth('郭鎮溢', `✈ 授權明細：
+• CAA(華航): A319-321 PW1100G · A319-321 V2500 · A330-300 GE CF6 · B737-800 CFM56
+• CAA(台虎): A320 V2500 · A320 PW1100G
+• CAAC(南方): A319-321 CFM56/V2500 · B737-700/800 · 東航: A319-321 CFM56/V2500 · B737-700/800 · 廈航: B737-700/800
+• CAAV(越南): A321 PW1100G/V2500
+• FAA(華航): B737-800 · FAA(美聯): B737-800
+• Korea MLTM(濟州/德威): B737-800`);
+
+addAuth('伍丁山', `✈ 授權明細：
+• CAA(華航): A319-321 PW1100G · A319-321 V2500 · B737-800 CFM56
+• CAA(台虎): A320 V2500 + Run-Up · A320 PW1100G
+• CAAC(南方): A319-321 CFM56/V2500 · B737-700/800 · 東航: A319-321 CFM56/V2500 · B737-700/800 · 廈航: B737-700/800
+• CAAV(越南): A321 PW1100G/V2500
+• FAA(華航): A320/321 CFM56/V2500 · B737-800`);
+
+addAuth('胡瓊文', `✈ 授權明細：
+• CAA(華航): A330-300 GE CF6 + Run-Up · B737-800 CFM56 + Run-Up
+• CAAC(南方): B737-700/800 · 東航: B737-700/800 · 廈航: B737-700/800
+• FAA(華航): B737-800 + Run-Up · FAA(美聯): B737-800
+• Korea MLTM(濟州/德威): B737-800`);
+
+addAuth('蔡嘉洋', `✈ 授權明細：
+• CAA(華航): A319-321 CFM LEAP-1A · A319-321 PW1100G + Run-Up · A319-321 V2500 · A350-900 RR TRENT XWB · B737-800 CFM56 + Run-Up · Borescope: IAE V2500 / PW1100G
+• CAA(台虎): A320 V2500 · A320 PW1100G + Run-Up
+• CAAC(南方): A319-321 V2500/PW1100G · B737-700/800 · 東航: B737-700/800
+• CAAV(越南): A321 PW1100G/V2500
+• FAA(華航): B737-800 · FAA(美聯): B737-800
+• Korea MLTM(濟州/德威): B737-800`);
+
+addAuth('張景驊', `✈ 授權明細：
+• CAA(華航): A319-321 PW1100G · A350-900 RR TRENT XWB`);
+
+addAuth('曾景松', `✈ 授權明細：
+• CAA(華航): A330-300 GE CF6 · B747-400 GE CF6/PW4000 · B777-200/300 GE90 · B777-300ER GE90
+• FAA(華航): B747-400 GE CF6/PW4000`);
+
+addAuth('方彥霖', `✈ 授權明細：
+• CAA(華航): B737-800 CFM56 · B777-200/300 GE90 · B777-300ER GE90`);
+
+addAuth('施登元', `✈ 授權明細：
+• CAA(華航): A319-321 PW1100G · No Limitation (M2)
+• FAA(華航): No Limitation (M2)`);
+
+addAuth('康子平', `✈ 授權明細：
+• CAA(華航): A319-321 CFM LEAP-1A · A319-321 PW1100G · A319-321 V2500 · No Limitation (M2)`);
+
+// ======================= 格式化授權文字為列表樣式（按航司分組，橘色線分隔）=======================
+function formatAuthText(authText) {
+    if (!authText) return '<div>無授權資料</div>';
+    // 移除開頭的 "✈ 授權明細：" 標題
+    let content = authText.replace(/^✈\s*授權明細：\s*/, '');
+    let lines = content.split('\n').filter(l => l.trim().length > 0);
+    let groups = []; // 每個元素 { header, items: [] }
+    let currentGroup = null;
+    for (let line of lines) {
+        line = line.trim();
+        if (line.startsWith('•')) {
+            // 格式如 "• CAA(華航): A330-300 ..."
+            let match = line.match(/^•\s*([^:]+):\s*(.*)$/);
+            if (match) {
+                let header = match[1].trim();
+                let itemsText = match[2].trim();
+                let items = itemsText.split('·').map(i => i.trim()).filter(i => i);
+                if (currentGroup && currentGroup.header === header) {
+                    currentGroup.items.push(...items);
+                } else {
+                    if (currentGroup) groups.push(currentGroup);
+                    currentGroup = { header: header, items: items };
                 }
-                // 若有不相符的年月，依實際年月重新計算（安全）
-                const usedYear = d.year || year;
-                const usedMonth = d.month || month;
-                const correctDow = getRealWeekday(usedYear, usedMonth, d.date);
-                return { ...d, dayOfWeek: correctDow, year: usedYear, month: usedMonth };
-            });
-        }
-        
-        function saveToLocalStorage(data,dates,fn,year,month){ localStorage.setItem(STORAGE_KEYS.SCHEDULE_DATA,JSON.stringify(data)); localStorage.setItem(STORAGE_KEYS.ALL_DATES,JSON.stringify(dates)); localStorage.setItem(STORAGE_KEYS.FILE_NAME,fn); localStorage.setItem(STORAGE_KEYS.YEAR_MONTH,JSON.stringify({year,month})); localStorage.setItem(STORAGE_KEYS.DEPUTY_STATUS,JSON.stringify(deputyStatus)); }
-        function loadFromLocalStorage(){ let data=localStorage.getItem(STORAGE_KEYS.SCHEDULE_DATA), dates=localStorage.getItem(STORAGE_KEYS.ALL_DATES), fn=localStorage.getItem(STORAGE_KEYS.FILE_NAME), ym=localStorage.getItem(STORAGE_KEYS.YEAR_MONTH); if(!data||!dates) return null; try{ let sD=JSON.parse(data), aD=JSON.parse(dates), yearMonth=ym?JSON.parse(ym):{year:2026,month:1}; let dep=localStorage.getItem(STORAGE_KEYS.DEPUTY_STATUS); if(dep) deputyStatus=JSON.parse(dep); else deputyStatus={};
-            // 修正快取日期星期 (利用真實年月)
-            const fixedDates = fixStoredDatesWeekday(aD, yearMonth.year, yearMonth.month);
-            return {scheduleData:sD,allDates:fixedDates,fileName:fn||'',year:yearMonth.year,month:yearMonth.month}; }catch(e){return null;} }
-        function clearLocalStorage(){ Object.values(STORAGE_KEYS).forEach(k=>localStorage.removeItem(k)); deputyStatus={}; }
-        function showLoading(){ document.getElementById('loadingSpinner').style.display='block'; document.getElementById('resultSection').style.display='none'; }
-        function hideLoading(){ document.getElementById('loadingSpinner').style.display='none'; document.getElementById('resultSection').style.display='block'; }
-        function showError(msg){ let errDiv=document.getElementById('errorMessage'); errDiv.innerHTML=`<i class="bi bi-exclamation-triangle"></i> ${msg}`; errDiv.style.display='block'; hideLoading(); }
-        
-        function parseWorkbook(workbook,fileName){
-            let ws=workbook.Sheets[workbook.SheetNames[0]];
-            let json=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
-            if(json.length<3){ showError('檔案格式錯誤'); return; }
-            let year=2026, month=1;
-            if(json[0]&&json[0][0]){ let txt=String(json[0][0]); let yMatch=txt.match(/(\d{4})\s*年/), mMatch=txt.match(/(\d{1,2})\s*月/); if(yMatch) year=parseInt(yMatch[1]); if(mMatch) month=parseInt(mMatch[1]); }
-            let dateRowIdx=-1;
-            for(let i=0;i<Math.min(10,json.length);i++){ let row=json[i]; if(!row) continue; let cnt=0; for(let c=3;c<=33;c++) if(row[c]>=1 && row[c]<=31) cnt++; if(cnt>=5){dateRowIdx=i; break;} }
-            if(dateRowIdx===-1) dateRowIdx=1;
-            let dateRow=json[dateRowIdx], dates=[];
-            for(let col=3;col<=33;col++){ let val=dateRow[col]; if(val>=1 && val<=31){ 
-                let dayNum = parseInt(val);
-                // 使用實際年月日計算星期幾
-                let realDow = getRealWeekday(year, month, dayNum);
-                dates.push({colIndex:col, date:dayNum, dayOfWeek:realDow, year, month}); 
-            } }
-            if(dates.length===0){ showError('找不到日期列'); return; }
-            let nameCol=2, schedule=[];
-            for(let r=dateRowIdx+1;r<json.length;r++){
-                let row=json[r]; if(!row||!row[nameCol]) continue;
-                let name=String(row[nameCol]).trim();
-                if(!targetPersonnel.includes(name)) continue;
-                let shifts={}, has=false;
-                dates.forEach(d=>{ let v=row[d.colIndex]; if(v&&v!==''){ let sv=String(v).trim(); if(sv.startsWith('=')) return; let ana=analyzeShift(sv); if(ana.normalizedShift){ shifts[d.date]={shift:ana.normalizedShift,originalShift:sv,isEnglishThreeCharSlash:ana.isEnglishThreeCharSlash,isOtherSlash:ana.isOtherSlash,isHoliday:ana.isHoliday}; has=true; } } });
-                if(has) schedule.push({name,category:getPersonCategory(name),shifts});
+            } else {
+                // 沒有冒號的當作延續項目
+                if (currentGroup) currentGroup.items.push(line.replace(/^•\s*/, ''));
             }
-            if(schedule.length===0){ showError('無目標人員資料'); return; }
-            scheduleData=schedule; allDates=dates; currentFileName=fileName; currentYear=year; currentMonth=month;
-            saveToLocalStorage(scheduleData,allDates,fileName,year,month);
-            updateDateSelect(); updateDateStats(); updateDeputyListDisplay();
-            hideLoading(); document.getElementById('fileInfo').style.display='none'; document.getElementById('resultSection').style.display='block'; document.getElementById('filterInfo').style.display='block'; document.getElementById('filterStatus').innerHTML=`已過濾 ${schedule.length} 人 (${fileName})  · 星期已正確定年${year}月${month}`;
-            showSelectedDateSchedule();
-        }
-        function handleFile(file){ currentFileName=file.name; document.getElementById('fileInfo').style.display='block'; document.getElementById('fileName').innerHTML=`處理: ${file.name}`; document.getElementById('errorMessage').style.display='none'; showLoading(); let reader=new FileReader(); reader.onload=e=>{ try{ let wb=XLSX.read(e.target.result,{type:'binary'}); parseWorkbook(wb,file.name); }catch(err){ showError('解析失敗:'+err.message); } }; reader.onerror=()=>showError('讀取失敗'); reader.readAsBinaryString(file); }
-        function updateDateSelect(){ let sel=document.getElementById('dateSelect'); sel.innerHTML=''; allDates.forEach(d=>{ let opt=document.createElement('option'); opt.value=d.date; opt.textContent=`${d.year}/${d.month}/${d.date} (${d.dayOfWeek})`; sel.appendChild(opt); }); if(allDates.length) sel.selectedIndex=0; }
-        function updateDateStats(){ let statsDiv=document.getElementById('dateStats'); if(allDates.length && allDates[0]) statsDiv.innerHTML=`<div class="alert alert-light py-1 mb-0"><i class="bi bi-calendar-range"></i> ${allDates[0].year}年${allDates[0].month}月 ${allDates[0].date}~${allDates[allDates.length-1].date} ・ 人員${scheduleData.length} (星期正確)</div>`; }
-        function updateDeputyListDisplay(){ let container=document.getElementById('deputyListContainer'); if(!container) return; container.innerHTML=''; let hasAny=false; deputyPersonnel.forEach(name=>{ if(scheduleData.some(p=>p.name===name)){ hasAny=true; let isChecked=!!deputyStatus[name]; let col=document.createElement('div'); col.className='col-6 col-md-3 mb-1'; col.innerHTML=`<div class="d-flex align-items-center p-1 border rounded"><input type="checkbox" class="deputy-checkbox me-1" id="dep-${name}" data-name="${name}" ${isChecked?'checked':''}><label class="small mb-0 ${isChecked?'fw-bold text-danger':''}" for="dep-${name}">${name}</label></div>`; container.appendChild(col); } }); document.getElementById('deputyListSection').style.display=hasAny?'block':'none'; document.querySelectorAll('.deputy-checkbox').forEach(cb=>cb.addEventListener('change',function(){ let nm=this.dataset.name; deputyStatus[nm]=this.checked; saveToLocalStorage(scheduleData,allDates,currentFileName,currentYear,currentMonth); updateDeputyListDisplay(); applyDeputyStatusToCards(); showSelectedDateSchedule(); })); }
-        function applyDeputyStatusToCards(){ document.querySelectorAll('.person-card').forEach(card=>{ let nameElem=card.querySelector('.person-name'); if(nameElem){ let name=nameElem.innerText.replace('代領班','').trim(); if(deputyStatus[name]){ card.classList.add('deputy-card'); if(!card.querySelector('.deputy-badge')) nameElem.insertAdjacentHTML('beforeend','<span class="deputy-badge ms-1">代領班</span>'); }else{ card.classList.remove('deputy-card'); let badge=card.querySelector('.deputy-badge'); if(badge) badge.remove(); } } }); }
-        
-        // 核心顯示函數 (沿用既有正確分類邏輯)
-        function showSelectedDateSchedule(){
-            let date=parseInt(document.getElementById('dateSelect').value); if(!date) return;
-            let shiftGroups={}, total=0; scheduleData.forEach(p=>{ let sd=p.shifts[date]; if(sd){ if(!shiftGroups[sd.shift]) shiftGroups[sd.shift]=[]; shiftGroups[sd.shift].push({name:p.name,shift:sd.shift,originalShift:sd.originalShift,isEnglishThreeCharSlash:sd.isEnglishThreeCharSlash,isOtherSlash:sd.isOtherSlash,isHoliday:sd.isHoliday,category:p.category}); total++; } });
-            document.getElementById('resultCount').innerText=total+'人'; let container=document.getElementById('scheduleResults'); container.innerHTML='';
-            if(total===0){ container.innerHTML='<div class="alert alert-warning">無出勤人員</div>'; return; }
-            let special=[], random=[], regular={}, holiday=[], warehouse=[], admin=[];
-            Object.values(shiftGroups).flat().forEach(p=>{ 
-                if(p.isHoliday||holidayShifts.includes(p.shift)) holiday.push(p);
-                else if(p.category==='warehouse-person') warehouse.push(p);
-                else if(p.category==='administrative-person') {
-                    if(regularShifts.includes(p.shift) && !p.isHoliday) {
-                        if(!regular[p.shift]) regular[p.shift]=[];
-                        regular[p.shift].push(p);
-                    } else {
-                        admin.push(p);
-                    }
-                }
-                else if(p.isOtherSlash) special.push(p);
-                else if(p.isEnglishThreeCharSlash) random.push(p);
-                else if(regularShifts.includes(p.shift)){
-                    if(!regular[p.shift]) regular[p.shift]=[];
-                    regular[p.shift].push(p);
-                } else random.push(p);
-            });
-            
-            function renderGroup(title,cssClass,persons,showTime=false){ if(!persons.length) return; let sec=document.createElement('div'); sec.className=`shift-section ${cssClass}`; sec.innerHTML=`<div class="shift-title ${cssClass.split('-')[0]}-title"><span>${title}</span><span class="float-end">${persons.length}</span></div><div class="row" id="tmp-${Date.now()}-${Math.random()}"></div>`; container.appendChild(sec); let row=sec.querySelector('.row'); let sorted=sortByRank(persons); let lastRank=null; sorted.forEach(p=>{ let cat=p.category||'random'; let cssCls=personnelCategories[cat]?.cssClass || 'random-person'; if(lastRank!==cat){ if(lastRank!==null) row.appendChild(document.createElement('hr')).className='rank-divider'; let titleDiv=document.createElement('div'); titleDiv.className='rank-title'; titleDiv.innerText=personnelCategories[cat]?.title||'其他'; row.appendChild(titleDiv); lastRank=cat; } let col=document.createElement('div'); col.className='col-6 col-sm-4 col-md-3 mb-2'; let isDep=!!deputyStatus[p.name]; let depBadge=isDep?'<span class="deputy-badge">代領班</span>':''; let timeHtml=(showTime && shiftDescriptions[p.shift])?`<div class="shift-description">${shiftDescriptions[p.shift]}</div>`:(p.originalShift?`<div class="shift-description">${p.originalShift}</div>`:''); col.innerHTML=`<div class="person-card ${cssCls} ${isDep?'deputy-card':''}"><div class="person-name">${p.name}${depBadge}</div>${timeHtml}</div>`; row.appendChild(col); }); }
-            function renderRegular(){ 
-                let order=['K0','M','M1','M2','M3','D4','D','D2','D5','D6','K2','N','K5','K6']; 
-                order.forEach(sh=>{ if(regular[sh]){ let persons=regular[sh]; let sec=document.createElement('div'); sec.className='shift-section regular-shift-section'; sec.innerHTML=`<div class="shift-title work-shift-title"><span class="badge bg-success">${sh}</span> <small>${shiftDescriptions[sh]||''}</small><span class="float-end">${persons.length}</span></div><div class="row" id="reg-${sh}"></div>`; container.appendChild(sec); let row=sec.querySelector('.row'); let sorted=sortByRank(persons); let lastRank=null; sorted.forEach(p=>{ let cat=p.category||'random'; let cssCls=personnelCategories[cat]?.cssClass || 'random-person'; if(lastRank!==cat){ if(lastRank) row.appendChild(document.createElement('hr')).className='rank-divider'; let titleDiv=document.createElement('div'); titleDiv.className='rank-title'; titleDiv.innerText=personnelCategories[cat]?.title||'其他'; row.appendChild(titleDiv); lastRank=cat; } let col=document.createElement('div'); col.className='col-6 col-sm-4 col-md-3 mb-2'; let isDep=!!deputyStatus[p.name]; col.innerHTML=`<div class="person-card ${cssCls} ${isDep?'deputy-card':''}"><div class="person-name">${p.name}${isDep?'<span class="deputy-badge">代領班</span>':''}</div></div>`; row.appendChild(col); }); } }); 
+        } else {
+            // 非 • 開頭的行，可能是續行
+            if (currentGroup && line.length > 0) {
+                currentGroup.items[currentGroup.items.length-1] += ' ' + line;
             }
-            renderGroup('隨機班型','random-section',random,true);
-            renderGroup('特殊班型','special-section',special,true);
-            renderRegular();
-            if(warehouse.length){ let sec=document.createElement('div'); sec.className='shift-section warehouse-section'; sec.innerHTML=`<div class="shift-title warehouse-title">🏚️ 庫房人員 <span class="float-end">${warehouse.length}</span></div><div class="row" id="wh-rows"></div>`; container.appendChild(sec); let row=sec.querySelector('.row'); let byShift={}; warehouse.forEach(p=>{if(!byShift[p.shift]) byShift[p.shift]=[]; byShift[p.shift].push(p);}); for(let sh in byShift){ let shiftPersons=byShift[sh]; let titleDiv=document.createElement('div'); titleDiv.className='warehouse-shift-title w-100 mt-1'; titleDiv.innerText=`${sh} ${shiftDescriptions[sh]||''} (${shiftPersons.length})`; row.appendChild(titleDiv); shiftPersons.forEach(p=>{ let col=document.createElement('div'); col.className='col-6 col-sm-4 col-md-3 mb-2'; let isDep=!!deputyStatus[p.name]; let cssCls=personnelCategories[p.category]?.cssClass || 'warehouse-person'; col.innerHTML=`<div class="person-card ${cssCls} ${isDep?'deputy-card':''}"><div class="person-name">${p.name}${isDep?'<span class="deputy-badge">代領班</span>':''}</div></div>`; row.appendChild(col); }); } }
-            if(admin.length){ let sec=document.createElement('div'); sec.className='shift-section administrative-section'; sec.innerHTML=`<div class="shift-title administrative-title">📋 行政人員 (其他班型) <span class="float-end">${admin.length}</span></div><div class="row"></div>`; container.appendChild(sec); let row=sec.querySelector('.row'); admin.forEach(p=>{ let col=document.createElement('div'); col.className='col-6 col-sm-4 col-md-3 mb-2'; let isDep=!!deputyStatus[p.name]; let cssCls=personnelCategories[p.category]?.cssClass || 'administrative-person'; col.innerHTML=`<div class="person-card ${cssCls} ${isDep?'deputy-card':''}"><div class="person-name">${p.name}${isDep?'<span class="deputy-badge">代領班</span>':''}<div class="shift-description">${shiftDescriptions[p.shift]||p.originalShift||''}</div></div></div>`; row.appendChild(col); }); }
-            if(holiday.length){ let sec=document.createElement('div'); sec.className='shift-section holiday-section'; let collapseId='holiday-'+Date.now(); sec.innerHTML=`<div class="shift-title holiday-title">🌴 休假人員 <span class="float-end">${holiday.length}</span></div><div><button class="btn btn-light btn-sm w-100 holiday-toggle-btn" data-bs-toggle="collapse" data-bs-target="#${collapseId}"><i class="bi bi-chevron-down"></i> 展開/收合 (${holiday.length}人)</button><div class="collapse" id="${collapseId}"><div class="collapse-content p-2" id="holidayContent"></div></div></div>`; container.appendChild(sec); let holidayDiv=sec.querySelector('#holidayContent'); let grouped={}; holiday.forEach(p=>{ let cat=p.category||'other'; if(!grouped[cat]) grouped[cat]=[]; grouped[cat].push(p); }); holidayDisplayOrder.forEach(cat=>{ if(grouped[cat] && grouped[cat].length){ let titleDiv=document.createElement('div'); titleDiv.className=`holiday-category-title ${cat}-title`; titleDiv.innerText=`${personnelCategories[cat]?.title||cat} (${grouped[cat].length})`; holidayDiv.appendChild(titleDiv); let rowDiv=document.createElement('div'); rowDiv.className='row'; grouped[cat].forEach(p=>{ let col=document.createElement('div'); col.className='col-6 col-sm-4 col-md-3 mb-2'; let isDep=!!deputyStatus[p.name]; let cssCls=personnelCategories[cat]?.cssClass || 'random-person'; col.innerHTML=`<div class="person-card ${cssCls} ${isDep?'deputy-card':''}"><div class="person-name">${p.name}${isDep?'<span class="deputy-badge">代領班</span>':''}</div></div>`; rowDiv.appendChild(col); }); holidayDiv.appendChild(rowDiv); } }); }
-            setTimeout(()=>{ document.querySelectorAll('.person-card').forEach(card=>{ if(!card.hasAttribute('data-listener')){ card.setAttribute('data-listener','true'); card.addEventListener('click',(e)=>{ let nameSpan=card.querySelector('.person-name'); if(nameSpan){ let name=nameSpan.innerText.replace('代領班','').trim(); navigator.clipboard.writeText(name); let notify=document.getElementById('copyNotification'); notify.classList.add('show'); setTimeout(()=>notify.classList.remove('show'),1500); } }); } }); applyDeputyStatusToCards(); },50);
         }
-        function init(){ document.getElementById('uploadBtn').addEventListener('click',()=>document.getElementById('fileInput').click()); document.getElementById('fileInput').addEventListener('change',e=>{ if(e.target.files[0]) handleFile(e.target.files[0]); }); document.getElementById('reuploadBtn').addEventListener('click',()=>document.getElementById('fileInput').click()); document.getElementById('clearStorageBtn').addEventListener('click',()=>{ if(confirm('清除所有資料？')){ clearLocalStorage(); location.reload(); } }); document.getElementById('dateSelect')?.addEventListener('change',()=>showSelectedDateSchedule()); let saved=loadFromLocalStorage(); if(saved){ scheduleData=saved.scheduleData; allDates=saved.allDates; currentFileName=saved.fileName; currentYear=saved.year; currentMonth=saved.month; updateDateSelect(); updateDateStats(); updateDeputyListDisplay(); document.getElementById('resultSection').style.display='block'; document.getElementById('filterInfo').style.display='block'; document.getElementById('filterStatus').innerHTML=`使用快取 (${currentFileName}) ${scheduleData.length}人 · 星期已校正`; showSelectedDateSchedule(); } }
-        document.addEventListener('DOMContentLoaded',init);
-    </script>
+    }
+    if (currentGroup) groups.push(currentGroup);
+    if (groups.length === 0) return `<div>${authText}</div>`;
+    
+    let html = '';
+    for (let i = 0; i < groups.length; i++) {
+        let g = groups[i];
+        html += `<div class="auth-group">`;
+        html += `<div class="auth-group-header"><i class="bi bi-building"></i> ${g.header}</div>`;
+        html += `<ul class="auth-items">`;
+        for (let item of g.items) {
+            html += `<li>${item}</li>`;
+        }
+        html += `</ul></div>`;
+        if (i < groups.length - 1) html += `<div class="orange-divider"></div>`;
+    }
+    return html;
+}
+
+// ======================= 其他全域變數與功能（保持原有邏輯）=======================
+const targetPersonnel = [
+    '馮一民','程家榮','范原福','黃茂松','喬宇民','陳登峯','蔡宗昌','江俊忠','鍾永源','林義勳','陳枝萬',
+    '陳郁青','林柏辰','王樂美','黃志傑','蘇健文','洪啓晃','黃弘仁','楊金雄','王昱博','郭鎮溢','伍丁山',
+    '胡瓊文','蔡嘉洋','張景驊','曾景松','方彥霖','施登元','康子平',
+    '嚴奕麟','劉勝得','蔡文財','吳建宗','張帝如','高銘諭','陳建旭','鄭旭軒','江啓民','馮宗賢','黃瑞昌',
+    '蘇權煌','黃策士','莊宇丞','侯欽仁','游源正','陳冠勛','吳世莛','葉翊楷','黃浥綸','楊富雄','林裕斌',
+    '江國棟','謝宏望','陳科全','蘇秉豪','蒲翊青','張馨元','施孟辰','林家德','李宗憲','楊育承','江育鐘',
+    '龔義文','陳昭良','吳振義','李家旭','江宜德','王樂善','葉長青','蘇傳靖','何源運'
+];
+const deputyPersonnel = ['陳登峯','陳枝萬','蔡宗昌','鍾永源','陳郁青','林義勳','江俊忠'];
+const holidayShifts = ['公','R','GBL','L','A','福','Z'];
+const shiftDescriptions = {'K0':'05:00~13:00','M':'05:30~13:30','M1':'06:00~14:00','M2':'06:30~14:30','M3':'07:00~15:00','D':'08:00~16:00','D2':'10:00~18:00','D4':'08:00~16:30','D5':'09:00~17:00','D6':'12:00~20:00','K2':'14:00~22:00','N':'16:00~24:00','K5':'21:00~05:00','K6':'22:00~06:00'};
+const personnelCategories = {
+    'group-leader':{names:['馮一民','嚴奕麟','范原福'],cssClass:'group-leader',title:'組長',rank:1},
+    'foreman':{names:['劉勝得','黃茂松','喬宇民'],cssClass:'foreman',title:'領班',rank:2},
+    'authorized-person':{names:['馮一民','程家榮','范原福','黃茂松','喬宇民','陳登峯','蔡宗昌','江俊忠','鍾永源','林義勳','陳枝萬','陳郁青','林柏辰','王樂美','黃志傑','蘇健文','洪啓晃','黃弘仁','楊金雄','王昱博','郭鎮溢','伍丁山','胡瓊文','蔡嘉洋','張景驊','曾景松','方彥霖','施登元','康子平'],cssClass:'authorized-person',title:'授權人員',rank:3},
+    'm1-person':{names:['蔡文財','吳建宗','張帝如','高銘諭','陳建旭','江啓民','馮宗賢','黃瑞昌','蘇權煌','侯欽仁','游源正','江育鐘','龔義文','陳冠勛','林裕斌','江國棟','吳世莛','葉翊楷','黃浥綸','楊富雄','陳科全','蘇秉豪','蒲翊青'],cssClass:'m1-person',title:'M1人員',rank:4},
+    'm0-person':{names:['鄭旭軒','黃策士','謝宏望','莊宇丞','張馨元','施孟辰','林家德','李宗憲','楊育承'],cssClass:'m0-person',title:'M0人員',rank:5},
+    'qc-person':{names:['吳振義','李家旭'],cssClass:'qc-person',title:'QC人員',rank:6},
+    'administrative-person':{names:['陳昭良'],cssClass:'administrative-person',title:'行政人員',rank:7},
+    'warehouse-person':{names:['江宜德','王樂善','葉長青','蘇傳靖','何源運'],cssClass:'warehouse-person',title:'庫房人員',rank:8},
+    'random':{names:[],cssClass:'random-person',title:'其他',rank:9}
+};
+let scheduleData = [], allDates = [], currentFileName = '', deputyStatus = {}, currentYear = 2026, currentMonth = 1;
+const STORAGE_KEYS = {SCHEDULE_DATA:'scheduleData_finalV3',ALL_DATES:'allDates_finalV3',FILE_NAME:'fileName_finalV3',DEPUTY_STATUS:'deputyStatus_finalV3',YEAR_MONTH:'yearMonth_finalV3'};
+
+function getPersonCategory(name) { for(let c in personnelCategories) if(personnelCategories[c].names.includes(name)) return c; return 'random'; }
+function analyzeShift(shiftStr){ if(!shiftStr) return {normalizedShift:'',isHoliday:false}; let s=shiftStr.trim(); let isHoliday=holidayShifts.includes(s); if(s.includes('福')||s.includes('公')) isHoliday=true; return {normalizedShift:s,isHoliday:isHoliday}; }
+function getRealWeekday(year,month,day){ return ['日','一','二','三','四','五','六'][new Date(year,month-1,day).getDay()]; }
+function saveToLocalStorage(data,dates,fn,year,month){ localStorage.setItem(STORAGE_KEYS.SCHEDULE_DATA,JSON.stringify(data)); localStorage.setItem(STORAGE_KEYS.ALL_DATES,JSON.stringify(dates)); localStorage.setItem(STORAGE_KEYS.FILE_NAME,fn); localStorage.setItem(STORAGE_KEYS.YEAR_MONTH,JSON.stringify({year,month})); localStorage.setItem(STORAGE_KEYS.DEPUTY_STATUS,JSON.stringify(deputyStatus)); }
+function loadFromLocalStorage(){ let data=localStorage.getItem(STORAGE_KEYS.SCHEDULE_DATA), dates=localStorage.getItem(STORAGE_KEYS.ALL_DATES), fn=localStorage.getItem(STORAGE_KEYS.FILE_NAME), ym=localStorage.getItem(STORAGE_KEYS.YEAR_MONTH); if(!data||!dates) return null; let sD=JSON.parse(data), aD=JSON.parse(dates), yearMonth=ym?JSON.parse(ym):{year:2026,month:1}, dep=localStorage.getItem(STORAGE_KEYS.DEPUTY_STATUS); if(dep) deputyStatus=JSON.parse(dep); return {scheduleData:sD,allDates:aD,fileName:fn||'',year:yearMonth.year,month:yearMonth.month}; }
+function clearLocalStorage(){ Object.values(STORAGE_KEYS).forEach(k=>localStorage.removeItem(k)); deputyStatus={}; location.reload(); }
+function showLoading(){ document.getElementById('loadingSpinner').style.display='block'; document.getElementById('resultSection').style.display='none'; }
+function hideLoading(){ document.getElementById('loadingSpinner').style.display='none'; document.getElementById('resultSection').style.display='block'; }
+function showError(msg){ let errDiv=document.getElementById('errorMessage'); errDiv.innerHTML=msg; errDiv.style.display='block'; hideLoading(); }
+
+function parseWorkbook(workbook,fileName){
+    let ws=workbook.Sheets[workbook.SheetNames[0]];
+    let json=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+    let year=2026,month=1;
+    if(json[0]&&json[0][0]){ let txt=String(json[0][0]); let yMatch=txt.match(/(\d{4})\s*年/), mMatch=txt.match(/(\d{1,2})\s*月/); if(yMatch) year=parseInt(yMatch[1]); if(mMatch) month=parseInt(mMatch[1]); }
+    let dateRowIdx=-1;
+    for(let i=0;i<Math.min(10,json.length);i++){ let row=json[i]; if(row && row.filter((v,idx)=>idx>=3&&idx<=33 && v>=1&&v<=31).length>=5){dateRowIdx=i; break;}}
+    if(dateRowIdx===-1) dateRowIdx=1;
+    let dateRow=json[dateRowIdx], dates=[];
+    for(let col=3;col<=33;col++){ let val=dateRow[col]; if(val>=1 && val<=31){ dates.push({colIndex:col, date:parseInt(val), dayOfWeek:getRealWeekday(year,month,parseInt(val)), year, month}); } }
+    let nameCol=2, schedule=[];
+    for(let r=dateRowIdx+1;r<json.length;r++){ let row=json[r]; if(!row||!row[nameCol]) continue; let name=String(row[nameCol]).trim(); if(!targetPersonnel.includes(name)) continue; let shifts={}; dates.forEach(d=>{ let v=row[d.colIndex]; if(v&&v!==''){ let sv=String(v).trim(); let ana=analyzeShift(sv); shifts[d.date]={shift:ana.normalizedShift, originalShift:sv, isHoliday:ana.isHoliday}; } }); if(Object.keys(shifts).length) schedule.push({name,category:getPersonCategory(name),shifts}); }
+    if(!schedule.length){ showError('無目標人員資料'); return; }
+    scheduleData=schedule; allDates=dates; currentFileName=fileName; currentYear=year; currentMonth=month; saveToLocalStorage(scheduleData,allDates,fileName,year,month);
+    updateDateSelect(); updateDateStats(); updateDeputyListDisplay(); hideLoading(); document.getElementById('resultSection').style.display='block'; showSelectedDateSchedule(); refreshAutoSort(); updateAuthDetailPanel();
+}
+function handleFile(file){ currentFileName=file.name; document.getElementById('fileInfo').style.display='block'; document.getElementById('fileName').innerHTML=file.name; showLoading(); let reader=new FileReader(); reader.onload=e=>{ let wb=XLSX.read(e.target.result,{type:'binary'}); parseWorkbook(wb,file.name); }; reader.readAsBinaryString(file); }
+function updateDateSelect(){ let sel=document.getElementById('dateSelect'); sel.innerHTML=''; allDates.forEach(d=>{ let opt=document.createElement('option'); opt.value=d.date; opt.textContent=`${d.year}/${d.month}/${d.date} (${d.dayOfWeek})`; sel.appendChild(opt); }); if(allDates.length) sel.selectedIndex=0; }
+function updateDateStats(){ let statsDiv=document.getElementById('dateStats'); if(allDates.length) statsDiv.innerHTML=`📅 ${allDates[0].year}年${allDates[0].month}月 ・人員${scheduleData.length}`; }
+function updateDeputyListDisplay(){ let container=document.getElementById('deputyListContainer'); if(!container) return; container.innerHTML=''; let hasAny=false; deputyPersonnel.forEach(name=>{ if(scheduleData.some(p=>p.name===name)){ hasAny=true; let isChecked=!!deputyStatus[name]; let col=document.createElement('div'); col.className='col-6 col-md-4 mb-1'; col.innerHTML=`<div class="form-check"><input class="form-check-input deputy-checkbox" type="checkbox" data-name="${name}" ${isChecked?'checked':''}><label class="form-check-label small">${name}</label></div>`; container.appendChild(col); } }); document.getElementById('deputyListSection').style.display=hasAny?'block':'none'; document.querySelectorAll('.deputy-checkbox').forEach(cb=>cb.addEventListener('change',function(){ deputyStatus[this.dataset.name]=this.checked; saveToLocalStorage(scheduleData,allDates,currentFileName,currentYear,currentMonth); updateDeputyListDisplay(); showSelectedDateSchedule(); refreshAutoSort(); })); }
+
+function showSelectedDateSchedule(){
+    let date=parseInt(document.getElementById('dateSelect').value); if(!date) return;
+    let container=document.getElementById('scheduleResults'); container.innerHTML='';
+    let total=0; let persons=[];
+    scheduleData.forEach(p=>{ if(p.shifts[date]) { total++; persons.push(p); } });
+    document.getElementById('resultCount').innerText=total+'人';
+    if(total===0){ container.innerHTML='<div class="alert alert-warning">無出勤人員</div>'; return; }
+    let groups={};
+    persons.forEach(p=>{ let sd=p.shifts[date]; let shiftCode=sd.shift; if(!groups[shiftCode]) groups[shiftCode]=[]; groups[shiftCode].push(p); });
+    let orderArr=['K0','M','M1','M2','M3','D','D2','D4','D5','D6','K2','N','其他'];
+    for(let sh of orderArr){
+        if(sh==='其他'){ let otherCodes=Object.keys(groups).filter(k=>!orderArr.includes(k) && !holidayShifts.includes(k) && k!=='其他'); otherCodes.forEach(oc=>{ renderShiftGroup(container,oc,groups[oc]); }); continue; }
+        if(groups[sh]) renderShiftGroup(container,sh,groups[sh]);
+    }
+    let holidayPersons=persons.filter(p=>p.shifts[date].isHoliday===true);
+    if(holidayPersons.length){
+        let sec=document.createElement('div'); sec.className='shift-section holiday-section mt-2';
+        let collapseId='holidayCollapse'+Date.now();
+        sec.innerHTML=`<div class="shift-title holiday-title d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#${collapseId}" style="cursor:pointer;"><span><i class="bi bi-tree"></i> 休假人員 <span class="float-end">${holidayPersons.length}</span></span><i class="bi bi-chevron-down"></i></div><div class="collapse" id="${collapseId}"><div class="row" id="holiday-row-${collapseId}"></div></div>`;
+        container.appendChild(sec);
+        let row=sec.querySelector(`#holiday-row-${collapseId}`);
+        holidayPersons.forEach(p=>{ let col=document.createElement('div'); col.className='col-6 col-sm-4 col-md-3 mb-2'; let cls=personnelCategories[p.category]?.cssClass||'random-person'; let isDep=!!deputyStatus[p.name]; col.innerHTML=`<div class="person-card ${cls} ${isDep?'deputy-card':''}" data-person="${p.name}" data-category="${p.category}"><div class="person-name">${p.name}${isDep?'<span class="deputy-badge">代領班</span>':''}</div><div class="shift-description">休假</div></div>`; row.appendChild(col); });
+    }
+    attachAuthClick(); attachCopyEvent(); applyDeputyStatusToCards();
+}
+function renderShiftGroup(container,shiftCode,personList){
+    let sec=document.createElement('div'); sec.className='shift-section regular-shift-section'; let timeStr=shiftDescriptions[shiftCode]||'';
+    sec.innerHTML=`<div class="shift-title work-shift-title"><span class="badge bg-success">${shiftCode}</span> <small>${timeStr}</small><span class="float-end">${personList.length}</span></div><div class="row" id="row-${shiftCode}"></div>`;
+    container.appendChild(sec); let row=sec.querySelector('.row');
+    personList.forEach(p=>{ let cls=personnelCategories[p.category]?.cssClass||'random-person'; let isDep=!!deputyStatus[p.name]; let col=document.createElement('div'); col.className='col-6 col-sm-4 col-md-3 mb-2'; col.innerHTML=`<div class="person-card ${cls} ${isDep?'deputy-card':''}" data-person="${p.name}" data-category="${p.category}"><div class="person-name">${p.name}${isDep?'<span class="deputy-badge">代領班</span>':''}</div></div>`; row.appendChild(col); });
+}
+function attachAuthClick(){ document.querySelectorAll('.person-card').forEach(card=>{ let name=card.getAttribute('data-person'); if(!name) return; let authText=authorizationDB.get(name); if(authText){ card.removeEventListener('click', showAuthModalHandler); card.addEventListener('click', showAuthModalHandler); function showAuthModalHandler(e){ e.stopPropagation(); document.getElementById('modalAuthContent').innerHTML = formatAuthText(authText); document.getElementById('authModal').style.display='flex'; } }else{ card.removeEventListener('click', copyHandler); card.addEventListener('click', copyHandler); } }); }
+function copyHandler(e){ let nameSpan=this.querySelector('.person-name'); if(nameSpan){ let name=nameSpan.innerText.replace('代領班','').trim(); navigator.clipboard.writeText(name); let notify=document.getElementById('copyNotification'); notify.style.opacity='1'; notify.style.display='block'; setTimeout(()=>{ notify.style.opacity='0'; setTimeout(()=>notify.style.display='none',300); },1200); } }
+function applyDeputyStatusToCards(){ document.querySelectorAll('.person-card').forEach(card=>{ let nameElem=card.querySelector('.person-name'); if(nameElem){ let name=nameElem.innerText.replace('代領班','').trim(); if(deputyStatus[name]){ card.classList.add('deputy-card'); if(!card.querySelector('.deputy-badge')) nameElem.insertAdjacentHTML('beforeend','<span class="deputy-badge ms-1">代領班</span>'); }else{ card.classList.remove('deputy-card'); let badge=card.querySelector('.deputy-badge'); if(badge) badge.remove(); } } }); }
+function attachCopyEvent(){ document.querySelectorAll('.person-card').forEach(card=>{ card.removeEventListener('click', copyHandler); if(!authorizationDB.get(card.getAttribute('data-person'))) card.addEventListener('click', copyHandler); }); }
+
+function refreshAutoSort(){
+    let date=parseInt(document.getElementById('dateSelect').value); if(!date || !scheduleData.length) return;
+    let shiftStartHour = {'K0':5,'M':5.5,'M1':6,'M2':6.5,'M3':7,'D':8,'D2':10,'D4':8,'D5':9,'D6':12,'K2':14,'N':16};
+    let excludeCategories = ['group-leader','foreman','authorized-person','administrative-person','warehouse-person'];
+    let candidates=[];
+    scheduleData.forEach(p=>{ let sd=p.shifts[date]; if(sd && !sd.isHoliday && sd.shift && sd.shift!=='K5' && sd.shift!=='K6' && !excludeCategories.includes(p.category)){ let hour=shiftStartHour[sd.shift]||24; candidates.push({name:p.name,shiftCode:sd.shift,shiftTime:shiftDescriptions[sd.shift]||'',startHour:hour}); } });
+    let beforeD6=candidates.filter(c=>c.startHour<12).sort((a,b)=>a.startHour-b.startHour || a.name.localeCompare(b.name));
+    let afterD6=candidates.filter(c=>c.startHour>=12 && c.startHour<=16).sort((a,b)=>a.startHour-b.startHour || a.name.localeCompare(b.name));
+    let resultDiv=document.getElementById('sortResultArea');
+    let html=`<div class="mb-3"><div class="fw-bold text-success"><i class="bi bi-sun"></i> D6之前 (早班) ${beforeD6.length}</div><div class="sort-group-list">`;
+    beforeD6.forEach(p=>{ html+=`<div class="sort-item" data-name="${p.name}"><span><i class="bi bi-person-circle"></i> ${p.name}</span><span class="badge-time">${p.shiftCode} ${p.shiftTime||''}</span></div>`; });
+    html+=`</div></div><div><div class="fw-bold text-primary"><i class="bi bi-moon-stars"></i> D6～N (午晚班) ${afterD6.length}</div><div class="sort-group-list">`;
+    afterD6.forEach(p=>{ html+=`<div class="sort-item" data-name="${p.name}"><span><i class="bi bi-person-circle"></i> ${p.name}</span><span class="badge-time">${p.shiftCode} ${p.shiftTime||''}</span></div>`; });
+    html+=`</div></div>`;
+    if(!beforeD6.length && !afterD6.length) html='<div class="alert alert-secondary small">今日無非授權/非管理職人員 (不含K5/K6/休假)</div>';
+    resultDiv.innerHTML=html;
+    document.querySelectorAll('.sort-item').forEach(el=>{ el.addEventListener('click',()=>{ let name=el.getAttribute('data-name'); if(name){ navigator.clipboard.writeText(name); let notify=document.getElementById('copyNotification'); notify.style.opacity='1'; notify.style.display='block'; setTimeout(()=>{ notify.style.opacity='0'; setTimeout(()=>notify.style.display='none',300); },1200); } }); });
+}
+
+function updateAuthDetailPanel(){
+    let date=parseInt(document.getElementById('dateSelect').value); if(!date || !scheduleData.length) return;
+    let authPersons = scheduleData.filter(p => p.shifts[date] && p.category === 'authorized-person');
+    let container = document.getElementById('authDetailContainer');
+    if(!authPersons.length){ container.innerHTML='<div class="text-muted small text-center">今日無授權人員上班</div>'; return; }
+    let html='';
+    authPersons.forEach(p => {
+        let authText = authorizationDB.get(p.name) || '✈ 請聯繫管理員取得詳細授權清單';
+        html += `<div class="auth-detail-item"><div class="auth-name"><i class="bi bi-person-check-fill"></i> ${p.name}</div>${formatAuthText(authText)}</div>`;
+    });
+    container.innerHTML = html;
+}
+
+window.closeModal = function(e){ if(e && e.target !== e.currentTarget && e.target.className !== 'close-modal') return; document.getElementById('authModal').style.display = 'none'; }
+
+document.getElementById('uploadBtn').onclick=()=>document.getElementById('fileInput').click();
+document.getElementById('fileInput').onchange=e=>{ if(e.target.files[0]) handleFile(e.target.files[0]); };
+document.getElementById('reuploadBtn').onclick=()=>document.getElementById('fileInput').click();
+document.getElementById('clearStorageBtn').onclick=()=>{ if(confirm('清除所有快取資料？')){ clearLocalStorage(); } };
+document.getElementById('dateSelect')?.addEventListener('change',()=>{ showSelectedDateSchedule(); refreshAutoSort(); updateAuthDetailPanel(); });
+document.getElementById('autoSortBtn')?.addEventListener('click',()=>refreshAutoSort());
+
+let saved=loadFromLocalStorage(); if(saved){ scheduleData=saved.scheduleData; allDates=saved.allDates; currentFileName=saved.fileName; currentYear=saved.year; currentMonth=saved.month; updateDateSelect(); updateDateStats(); updateDeputyListDisplay(); document.getElementById('resultSection').style.display='block'; showSelectedDateSchedule(); refreshAutoSort(); updateAuthDetailPanel(); }
+</script>
 </body>
-</html>
+                                                                                                                    </html>
